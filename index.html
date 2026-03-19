@@ -140,13 +140,13 @@
     <div class="consent-title">개인정보 수집·이용 동의</div>
     <div class="consent-sub">신세계푸드 의료비 제출 시스템</div>
     <div class="consent-body">
-      <div class="consent-section"><div class="consent-label">수집 항목</div><div class="consent-text">사번, 성명, 의료비 증빙서류 이미지 (서류 내 포함: 주민등록번호, 주소, 병명·진단내역)</div></div>
+      <div class="consent-section"><div class="consent-label">수집 항목</div><div class="consent-text">사번, 성명, 의료비 증빙서류 이미지 (서류 내 포함: 생년월일, 주소, 병명·진단내역)<br><span style="color:#DC2626;font-weight:700;">※ 주민번호 뒷자리는 가려서 제출</span></div></div>
       <div class="consent-section"><div class="consent-label">수집 목적</div><div class="consent-text">의료비 복리후생 정산 처리</div></div>
       <div class="consent-section"><div class="consent-label">보유 기간</div><div class="consent-text">급여 반영 완료 후 3년 보관, 보관기간 종료 시 파기</div></div>
       <div class="consent-section"><div class="consent-label">처리 방식</div><div class="consent-text">기기 내에서 이미지 보정 및 PDF 변환 후 HTTPS 암호화 전송. 브라우저에 쿠키·저장소 데이터가 일절 저장되지 않으며, 브라우저 종료 시 모든 데이터가 즉시 소멸됩니다.</div></div>
       <div class="consent-section" style="border:none"><div class="consent-label">거부 권리</div><div class="consent-text">동의를 거부할 수 있으며, 거부 시 서류를 기존 우편 방식으로 제출하실 수 있습니다.</div></div>
     </div>
-    <button class="consent-btn" onclick="agreeAndStart()">동의하고 시작하기</button>
+    <button class="consent-btn" onclick="showPrivacyAlert()">동의하고 시작하기</button>
     <div class="consent-footer">본 동의는 현재 세션에만 유효하며 별도 저장되지 않습니다</div>
   </div>
  
@@ -258,6 +258,21 @@
     </div>
   </div>
  
+  <!-- PRIVACY ALERT POPUP -->
+  <div id="privacy-popup" class="overlay hidden" onclick="closePrivacyAlert()">
+    <div style="background:#fff;border-radius:18px;width:90%;max-width:360px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;" onclick="event.stopPropagation()">
+      <div style="background:#FEF2F2;padding:20px 24px;text-align:center;border-bottom:1px solid #FECACA;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div style="padding:24px;text-align:center;">
+        <div style="font-size:17px;font-weight:800;color:#1E293B;margin-bottom:12px;">주민번호 뒷자리 가림 안내</div>
+        <div style="font-size:14px;color:#475569;line-height:1.7;margin-bottom:8px;">서류 촬영 시<br><span style="font-size:16px;font-weight:800;color:#DC2626;">주민번호 뒷자리는 반드시 가려서</span><br>촬영해주세요.</div>
+        <div style="font-size:12px;color:#94A3B8;margin-bottom:20px;">(포스트잇, 손가락 등으로 가린 후 촬영)</div>
+        <button onclick="confirmPrivacyAlert()" style="width:100%;padding:14px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1D4ED8,#2563EB);border:none;border-radius:12px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(37,99,235,.3);">확인했습니다</button>
+      </div>
+    </div>
+  </div>
+ 
   <!-- PREVIEW MODAL -->
   <div id="preview-modal" class="overlay hidden" onclick="closePreview()">
     <div class="modal" onclick="event.stopPropagation()">
@@ -289,6 +304,17 @@ function showScreen(id) {
   ['consent-screen', 'main-screen', 'success-screen'].forEach(s => {
     document.getElementById(s).classList.toggle('hidden', s !== id);
   });
+}
+ 
+function showPrivacyAlert() {
+  document.getElementById('privacy-popup').classList.remove('hidden');
+}
+function closePrivacyAlert() {
+  document.getElementById('privacy-popup').classList.add('hidden');
+}
+function confirmPrivacyAlert() {
+  document.getElementById('privacy-popup').classList.add('hidden');
+  agreeAndStart();
 }
  
 function agreeAndStart() {
