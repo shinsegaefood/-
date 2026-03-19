@@ -299,6 +299,22 @@
     </div>
   </div>
  
+  <!-- COMPLETE POPUP -->
+  <div id="complete-popup" class="overlay hidden">
+    <div style="background:#fff;border-radius:20px;width:90%;max-width:340px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .4s ease;text-align:center;">
+      <div style="background:linear-gradient(180deg,#F0FDF4,#DCFCE7);padding:28px 24px 20px;">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div style="padding:20px 24px 28px;">
+        <div style="font-size:20px;font-weight:800;color:#065F46;margin-bottom:8px;">전송 완료!</div>
+        <div style="font-size:14px;color:#047857;font-weight:600;margin-bottom:4px;"><span id="complete-name"></span>님의</div>
+        <div style="font-size:14px;color:#047857;margin-bottom:16px;">서류가 정상적으로 전송되었습니다.</div>
+        <div style="font-size:11.5px;color:#6EE7B7;margin-bottom:20px;">담당자 Google Drive에 안전하게 저장되었습니다</div>
+        <button onclick="closeCompletePopup()" style="width:100%;padding:14px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#059669,#10B981);border:none;border-radius:12px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(16,185,129,.3);">확인</button>
+      </div>
+    </div>
+  </div>
+ 
   <!-- PRIVACY ALERT POPUP -->
   <div id="privacy-popup" class="overlay hidden" onclick="closePrivacyAlert()">
     <div style="background:#fff;border-radius:18px;width:90%;max-width:360px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;" onclick="event.stopPropagation()">
@@ -345,6 +361,18 @@ function showScreen(id) {
   ['consent-screen', 'main-screen', 'success-screen'].forEach(s => {
     document.getElementById(s).classList.toggle('hidden', s !== id);
   });
+}
+ 
+function closeCompletePopup() {
+  document.getElementById('complete-popup').classList.add('hidden');
+  secureCleanup();
+  images = [];
+  document.getElementById('empId').value = '';
+  document.getElementById('empName').value = '';
+  const txt = document.getElementById('submit-text');
+  txt.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> PDF 변환 및 전송';
+  renderList();
+  updateSubmitBtn();
 }
  
 function showPrivacyAlert() {
@@ -594,21 +622,9 @@ async function handleSubmit() {
     console.error('전송 오류:', err);
   }
  
-  // 성공 화면
-  document.getElementById('success-msg').textContent = empId + ' ' + empName + '님의 서류가 전송되었습니다.';
-  showScreen('success-screen');
- 
-  // 초기화
-  setTimeout(() => {
-    secureCleanup();
-    images = [];
-    document.getElementById('empId').value = '';
-    document.getElementById('empName').value = '';
-    txt.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> PDF 변환 및 전송';
-    renderList();
-    updateSubmitBtn();
-    showScreen('main-screen');
-  }, 5000);
+  // 전송 완료 팝업
+  document.getElementById('complete-name').textContent = empId + ' ' + empName;
+  document.getElementById('complete-popup').classList.remove('hidden');
 }
  
 // 페이지 이탈 시 메모리 해제
