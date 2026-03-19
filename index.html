@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>신세계푸드 의료비 청구</title>
+<title>신세계푸드 의료비 제출</title>
 <style>
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
   body { background:#F1F3F7; font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif; color:#1E293B; }
@@ -138,7 +138,7 @@
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
     <div class="consent-title">개인정보 수집·이용 동의</div>
-    <div class="consent-sub">신세계푸드 의료비 청구 시스템</div>
+    <div class="consent-sub">신세계푸드 의료비 제출 시스템</div>
     <div class="consent-body">
       <div class="consent-section"><div class="consent-label">수집 항목</div><div class="consent-text">사번, 성명, 의료비 증빙서류 이미지 (서류 내 포함: 생년월일, 주소, 병명·진단내역)<br><span style="color:#DC2626;font-weight:700;">※ 주민번호 뒷자리는 가려서 제출</span></div></div>
       <div class="consent-section"><div class="consent-label">수집 목적</div><div class="consent-text">의료비 복리후생 정산 처리</div></div>
@@ -237,7 +237,48 @@
         <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:#475569;line-height:1.6;">
           <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">1</span>사번과 이름을 입력합니다</div>
           <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">2</span>의료비 서류를 카메라로 촬영하거나 갤러리에서 선택합니다</div>
-          <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">3</span><div>서류 순서를 개인별로 정리해주세요<br><span style="font-size:11.5px;color:#64748B;">(예: 홍길동 진단서/진료확인서→영수증→세부내역서, 배우자 진단서/진료확인서→영수증→세부내역서)</span><br><span style="font-size:11.5px;color:#94A3B8;">▲▼ 버튼으로 순서 변경 가능</span></div></div>
+          <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">3</span><div style="flex:1;">서류 순서를 개인별로 정리해주세요<br><span style="font-size:11.5px;color:#94A3B8;">▲▼ 버튼으로 순서 변경 가능</span></div></div>
+ 
+          <!-- 시각적 순서 예시 -->
+          <div style="background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px;margin:6px 0 4px 0;">
+            <div style="font-size:11px;font-weight:700;color:#94A3B8;text-align:center;margin-bottom:10px;">📋 업로드 순서 예시</div>
+ 
+            <!-- 홍길동 -->
+            <div style="margin-bottom:10px;">
+              <div style="display:inline-block;background:#1D4ED8;color:#fff;font-size:10.5px;font-weight:700;padding:2px 10px;border-radius:10px;margin-bottom:6px;">홍길동 (본인)</div>
+              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#1E40AF;text-align:center;">
+                  <div style="font-size:13px;margin-bottom:1px;">📄</div>진단서<div style="font-size:9px;color:#60A5FA;">/진료확인서</div>
+                </div>
+                <div style="color:#94A3B8;font-size:16px;font-weight:700;">→</div>
+                <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#1E40AF;text-align:center;">
+                  <div style="font-size:13px;margin-bottom:1px;">🧾</div>영수증
+                </div>
+                <div style="color:#94A3B8;font-size:16px;font-weight:700;">→</div>
+                <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#1E40AF;text-align:center;">
+                  <div style="font-size:13px;margin-bottom:1px;">📑</div>세부내역서
+                </div>
+              </div>
+            </div>
+ 
+            <!-- 배우자 -->
+            <div>
+              <div style="display:inline-block;background:#7C3AED;color:#fff;font-size:10.5px;font-weight:700;padding:2px 10px;border-radius:10px;margin-bottom:6px;">배우자</div>
+              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#5B21B6;text-align:center;">
+                  <div style="font-size:13px;margin-bottom:1px;">📄</div>진단서<div style="font-size:9px;color:#A78BFA;">/진료확인서</div>
+                </div>
+                <div style="color:#94A3B8;font-size:16px;font-weight:700;">→</div>
+                <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#5B21B6;text-align:center;">
+                  <div style="font-size:13px;margin-bottom:1px;">🧾</div>영수증
+                </div>
+                <div style="color:#94A3B8;font-size:16px;font-weight:700;">→</div>
+                <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#5B21B6;text-align:center;">
+                  <div style="font-size:13px;margin-bottom:1px;">📑</div>세부내역서
+                </div>
+              </div>
+            </div>
+          </div>
           <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">4</span>하단 전송 버튼을 누르면 PDF로 자동 변환되어 담당자에게 전송됩니다</div>
         </div>
       </div>
