@@ -17,9 +17,9 @@
   @keyframes pulse { 0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)} }
   @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
   @keyframes slideDown { from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)} }
- 
+
   .container { max-width:480px; margin:0 auto; min-height:100vh; background:#F1F3F7; }
- 
+
   /* Consent */
   .consent-wrap { padding:40px 24px; display:flex; flex-direction:column; align-items:center; min-height:100vh; justify-content:center; animation:fadeUp .5s ease; }
   .consent-shield { width:72px; height:72px; border-radius:50%; background:#EFF6FF; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; border:2px solid #BFDBFE; }
@@ -32,7 +32,7 @@
   .consent-text { font-size:13px; color:#475569; line-height:1.6; }
   .consent-btn { width:100%; padding:16px; font-size:16px; font-weight:800; color:#fff; background:linear-gradient(135deg,#1D4ED8,#2563EB); border:none; border-radius:14px; cursor:pointer; box-shadow:0 4px 16px rgba(37,99,235,.35); }
   .consent-footer { font-size:10.5px; color:#A0AEC0; margin-top:14px; text-align:center; }
- 
+
   /* Header */
   .header { background:linear-gradient(160deg,#0C1929,#162D50 60%,#1E3A5F); position:sticky; top:0; z-index:100; box-shadow:0 4px 20px rgba(12,25,41,.35); }
   .header-inner { padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
@@ -41,7 +41,7 @@
   .brand-name { font-size:17px; font-weight:800; color:#fff; letter-spacing:-.03em; }
   .brand-sub { font-size:11px; color:rgba(255,255,255,.45); margin-top:1px; }
   .sec-badge { display:flex; align-items:center; gap:5px; color:#34D399; background:rgba(52,211,153,.1); padding:5px 10px; border-radius:20px; border:1px solid rgba(52,211,153,.2); font-size:10px; font-weight:700; }
- 
+
   /* Main */
   .main { padding:12px 16px 36px; display:flex; flex-direction:column; gap:12px; }
   .card { background:#fff; border-radius:16px; padding:16px 16px 14px; box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.02); }
@@ -49,13 +49,13 @@
   .title-dot { width:6px; height:6px; border-radius:50%; background:linear-gradient(135deg,#3B82F6,#1D4ED8); flex-shrink:0; }
   .badge { background:#3B82F6; color:#fff; font-size:10.5px; font-weight:700; padding:1px 8px; border-radius:20px; margin-left:4px; }
   .hint { font-size:10.5px; font-weight:400; color:#A0AEC0; margin-left:auto; }
- 
+
   /* Inputs */
   .row { display:flex; gap:10px; }
   .field { flex:1; }
   .lbl { display:block; font-size:11.5px; font-weight:650; color:#64748B; margin-bottom:5px; }
   .inp { width:100%; padding:11px 12px; font-size:15px; border:1.5px solid #E8ECF1; border-radius:11px; background:#F8FAFC; color:#1E293B; font-family:inherit; transition:all .2s; }
- 
+
   /* Upload */
   .upload-row { display:flex; gap:10px; }
   .up-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:20px 12px 14px; border:2px dashed #D1D9E6; border-radius:14px; background:#FAFBFD; cursor:pointer; color:#475569; }
@@ -67,7 +67,7 @@
   .proc { display:flex; align-items:center; gap:10px; margin-top:12px; padding:10px 14px; background:#FFF7ED; border-radius:10px; font-size:12.5px; font-weight:600; color:#C2410C; }
   .spinner { width:16px; height:16px; border:2.5px solid #FDBA74; border-top-color:#C2410C; border-radius:50%; animation:spin .65s linear infinite; flex-shrink:0; }
   .spinner-w { width:18px; height:18px; border:2.5px solid rgba(255,255,255,.25); border-top-color:#fff; border-radius:50%; animation:spin .65s linear infinite; }
- 
+
   /* List */
   .list { display:flex; flex-direction:column; gap:4px; }
   .item { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:11px; background:#F8FAFC; border:1.5px solid transparent; cursor:grab; transition:all .15s; }
@@ -83,19 +83,19 @@
   .btns { display:flex; align-items:center; gap:1px; flex-shrink:0; }
   .m-btn { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border:none; border-radius:7px; background:transparent; color:#64748B; cursor:pointer; padding:0; }
   .d-btn { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border:none; border-radius:7px; background:transparent; color:#EF4444; cursor:pointer; padding:0; margin-left:2px; }
- 
+
   /* Submit */
   .submit { width:100%; padding:15px; font-size:15.5px; font-weight:800; color:#fff; background:linear-gradient(135deg,#1D4ED8,#2563EB 50%,#3B82F6); border:none; border-radius:14px; cursor:pointer; box-shadow:0 4px 16px rgba(37,99,235,.35); display:flex; align-items:center; justify-content:center; gap:10px; }
   .submit:disabled { background:#CBD5E1; box-shadow:none; cursor:not-allowed; }
- 
+
   /* Security Info */
   .sec-info { background:#F0FDF4; border-radius:12px; padding:12px 16px; display:flex; flex-direction:column; gap:8px; border:1px solid #BBF7D0; }
   .sec-row { display:flex; align-items:center; gap:8px; font-size:11.5px; color:#166534; font-weight:500; }
- 
+
   /* Warning */
   .warn-bar { display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border-radius:12px; background:#FEF2F2; border:1px solid #FECACA; animation:slideDown .3s ease; }
   .warn-txt { font-size:12px; color:#991B1B; line-height:1.5; }
- 
+
   /* Success */
   .success-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:40px; background:linear-gradient(180deg,#F0FDF4,#F1F3F7); animation:fadeUp .5s ease; }
   .success-title { font-size:22px; font-weight:800; color:#065F46; margin:20px 0 8px; }
@@ -104,16 +104,16 @@
   .success-dots { display:flex; gap:8px; margin-top:28px; }
   .dot { width:8px; height:8px; border-radius:50%; background:#34D399; animation:pulse 1.2s ease infinite; }
   .success-auto { font-size:11px; color:#A7F3D0; margin-top:16px; }
- 
+
   /* Guide */
   .guide { text-align:center; padding:20px 20px 24px; background:#fff; border-radius:16px; box-shadow:0 1px 4px rgba(0,0,0,.04); }
   .guide-title { font-size:14px; font-weight:800; color:#475569; margin:12px 0 16px; }
   .steps { text-align:left; display:flex; flex-direction:column; gap:10px; padding:0 8px; }
   .step { display:flex; align-items:flex-start; gap:10px; font-size:12.5px; color:#64748B; line-height:1.5; }
   .sn { width:20px; height:20px; border-radius:50%; flex-shrink:0; background:#EFF6FF; color:#3B82F6; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; }
- 
+
   .footer { text-align:center; font-size:10.5px; color:#A0AEC0; padding:6px 0 0; line-height:1.6; }
- 
+
   /* Modal */
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(6px); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; }
   .modal { background:#fff; border-radius:18px; width:100%; max-width:440px; max-height:85vh; overflow:auto; box-shadow:0 24px 60px rgba(0,0,0,.25); }
@@ -125,12 +125,12 @@
   .cmp-lbl { font-size:10.5px; font-weight:700; color:#94A3B8; text-align:center; margin-bottom:6px; padding:3px 10px; background:#F1F5F9; border-radius:6px; }
   .cmp-lbl-b { color:#2563EB; background:#EFF6FF; }
   .prv-img { width:100%; border-radius:8px; border:1px solid #E8ECF1; }
- 
+
   .hidden { display:none !important; }
 </style>
 </head>
 <body>
- 
+
 <div class="container" id="app">
   <!-- CONSENT SCREEN -->
   <div id="consent-screen" class="consent-wrap">
@@ -149,7 +149,7 @@
     <button class="consent-btn" onclick="showPrivacyAlert()">동의하고 시작하기</button>
     <div class="consent-footer">본 동의는 현재 세션에만 유효하며 별도 저장되지 않습니다</div>
   </div>
- 
+
   <!-- MAIN SCREEN -->
   <div id="main-screen" class="hidden">
     <div class="header">
@@ -164,13 +164,13 @@
         </div>
       </div>
     </div>
- 
+
     <div class="main">
       <div id="timeout-warn" class="warn-bar hidden">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <div class="warn-txt"><b>1분 후 자동 초기화됩니다</b> — 보안을 위해 무활동 시 데이터가 삭제됩니다. 화면을 터치하면 연장됩니다.</div>
       </div>
- 
+
       <!-- Employee Info -->
       <div class="card">
         <div class="card-title"><span class="title-dot"></span>제출자 정보</div>
@@ -185,7 +185,7 @@
           </div>
         </div>
       </div>
- 
+
       <!-- Upload -->
       <div class="card">
         <div class="card-title">
@@ -208,7 +208,7 @@
         <input type="file" id="fileInput" accept="image/*" multiple onchange="handleFiles(this.files);this.value=''" style="display:none">
         <div id="proc-bar" class="proc hidden"><div class="spinner"></div>스캔 보정 처리 중...</div>
       </div>
- 
+
       <!-- Image List -->
       <div id="list-card" class="card hidden">
         <div class="card-title">
@@ -217,20 +217,20 @@
         </div>
         <div id="image-list" class="list"></div>
       </div>
- 
+
       <!-- Submit -->
       <button class="submit" id="submit-btn" disabled onclick="handleSubmit()">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         <span id="submit-text">PDF 변환 및 전송</span>
       </button>
- 
+
       <!-- Security Info -->
       <div class="sec-info">
         <div class="sec-row"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>브라우저 저장소(쿠키·로컬스토리지) 미사용</span></div>
         <div class="sec-row"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><span>HTTPS 암호화 전송</span></div>
         <div class="sec-row"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>10분 무활동 시 자동 데이터 삭제</span></div>
       </div>
- 
+
       <!-- 이용방법 -->
       <div class="card" style="background:#F8FAFC; border:1px dashed #CBD5E1;">
         <div class="card-title" style="margin-bottom:10px;"><span class="title-dot"></span>이용방법</div>
@@ -238,55 +238,14 @@
           <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">1</span>사번과 이름을 입력합니다</div>
           <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">2</span>의료비 서류를 카메라로 촬영하거나 갤러리에서 선택합니다</div>
           <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">3</span><div style="flex:1;">서류 순서를 개인별로 정리해주세요<br><span style="font-size:11.5px;color:#94A3B8;">▲▼ 버튼으로 순서 변경 가능</span></div></div>
- 
-          <!-- 시각적 순서 예시 -->
-          <div style="background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px;margin:6px 0 4px 0;">
-            <div style="font-size:11px;font-weight:700;color:#94A3B8;text-align:center;margin-bottom:10px;">📋 업로드 순서 예시</div>
- 
-            <!-- 홍길동 -->
-            <div style="margin-bottom:10px;">
-              <div style="display:inline-block;background:#1D4ED8;color:#fff;font-size:10.5px;font-weight:700;padding:2px 10px;border-radius:10px;margin-bottom:6px;">홍길동 (본인)</div>
-              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-                <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#1E40AF;text-align:center;">
-                  <div style="font-size:13px;margin-bottom:1px;">📄</div>진단서<div style="font-size:9px;color:#60A5FA;">/진료확인서</div>
-                </div>
-                <div style="color:#94A3B8;font-size:16px;font-weight:700;">→</div>
-                <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#1E40AF;text-align:center;">
-                  <div style="font-size:13px;margin-bottom:1px;">🧾</div>영수증
-                </div>
-                <div style="color:#94A3B8;font-size:16px;font-weight:700;">→</div>
-                <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#1E40AF;text-align:center;">
-                  <div style="font-size:13px;margin-bottom:1px;">📑</div>세부내역서
-                </div>
-              </div>
-            </div>
- 
-            <!-- 배우자 -->
-            <div>
-              <div style="display:inline-block;background:#7C3AED;color:#fff;font-size:10.5px;font-weight:700;padding:2px 10px;border-radius:10px;margin-bottom:6px;">배우자</div>
-              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-                <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#5B21B6;text-align:center;">
-                  <div style="font-size:13px;margin-bottom:1px;">📄</div>진단서<div style="font-size:9px;color:#A78BFA;">/진료확인서</div>
-                </div>
-                <div style="color:#94A3B8;font-size:16px;font-weight:700;">→</div>
-                <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#5B21B6;text-align:center;">
-                  <div style="font-size:13px;margin-bottom:1px;">🧾</div>영수증
-                </div>
-                <div style="color:#94A3B8;font-size:16px;font-weight:700;">→</div>
-                <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;color:#5B21B6;text-align:center;">
-                  <div style="font-size:13px;margin-bottom:1px;">📑</div>세부내역서
-                </div>
-              </div>
-            </div>
-          </div>
           <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">4</span>하단 전송 버튼을 누르면 PDF로 자동 변환되어 담당자에게 전송됩니다</div>
         </div>
       </div>
- 
+
       <div class="footer">사진은 기기 내에서만 보정 처리 · 원본은 서버에 전송되지 않습니다</div>
     </div>
   </div>
- 
+
   <!-- SUCCESS SCREEN -->
   <div id="success-screen" class="hidden">
     <div class="success-screen">
@@ -298,7 +257,65 @@
       <div class="success-auto">메모리 초기화 후 자동으로 돌아갑니다</div>
     </div>
   </div>
- 
+
+  <!-- UPLOAD ORDER GUIDE POPUP -->
+  <div id="order-popup" class="overlay hidden">
+    <div style="background:#fff;border-radius:20px;width:92%;max-width:380px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;">
+      <div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);padding:18px 20px;text-align:center;border-bottom:1px solid #BFDBFE;">
+        <div style="font-size:17px;font-weight:800;color:#1E3A5F;">📋 업로드 순서 안내</div>
+        <div style="font-size:11.5px;color:#64748B;margin-top:4px;">아래 순서대로 촬영/업로드 해주세요</div>
+        <div style="font-size:11px;color:#DC2626;font-weight:600;margin-top:6px;background:#FEF2F2;padding:4px 12px;border-radius:8px;display:inline-block;">⚠️ 순서가 맞지 않으면 정산 처리가 지연됩니다</div>
+      </div>
+      <div style="padding:18px 20px;">
+        <!-- 홍길동 -->
+        <div style="margin-bottom:14px;">
+          <div style="display:inline-block;background:#1D4ED8;color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:10px;margin-bottom:8px;">홍길동 (본인)</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="flex:1;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:8px 6px;text-align:center;">
+              <div style="font-size:18px;margin-bottom:3px;">📄</div>
+              <div style="font-size:11px;font-weight:700;color:#1E40AF;">진단서/</div>
+              <div style="font-size:11px;font-weight:700;color:#1E40AF;">진료확인서</div>
+            </div>
+            <div style="color:#94A3B8;font-size:20px;font-weight:700;flex-shrink:0;">→</div>
+            <div style="flex:1;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:8px 6px;text-align:center;">
+              <div style="font-size:18px;margin-bottom:3px;">🧾</div>
+              <div style="font-size:11px;font-weight:700;color:#1E40AF;">영수증</div>
+            </div>
+            <div style="color:#94A3B8;font-size:20px;font-weight:700;flex-shrink:0;">→</div>
+            <div style="flex:1;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:8px 6px;text-align:center;">
+              <div style="font-size:18px;margin-bottom:3px;">📑</div>
+              <div style="font-size:11px;font-weight:700;color:#1E40AF;">세부내역서</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 배우자 -->
+        <div style="margin-bottom:18px;">
+          <div style="display:inline-block;background:#7C3AED;color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:10px;margin-bottom:8px;">배우자</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="flex:1;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:8px 6px;text-align:center;">
+              <div style="font-size:18px;margin-bottom:3px;">📄</div>
+              <div style="font-size:11px;font-weight:700;color:#5B21B6;">진단서/</div>
+              <div style="font-size:11px;font-weight:700;color:#5B21B6;">진료확인서</div>
+            </div>
+            <div style="color:#94A3B8;font-size:20px;font-weight:700;flex-shrink:0;">→</div>
+            <div style="flex:1;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:8px 6px;text-align:center;">
+              <div style="font-size:18px;margin-bottom:3px;">🧾</div>
+              <div style="font-size:11px;font-weight:700;color:#5B21B6;">영수증</div>
+            </div>
+            <div style="color:#94A3B8;font-size:20px;font-weight:700;flex-shrink:0;">→</div>
+            <div style="flex:1;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:8px 6px;text-align:center;">
+              <div style="font-size:18px;margin-bottom:3px;">📑</div>
+              <div style="font-size:11px;font-weight:700;color:#5B21B6;">세부내역서</div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="closeOrderPopup()" style="width:100%;padding:14px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1D4ED8,#2563EB);border:none;border-radius:12px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(37,99,235,.3);">확인</button>
+      </div>
+    </div>
+  </div>
+
   <!-- COMPLETE POPUP -->
   <div id="complete-popup" class="overlay hidden">
     <div style="background:#fff;border-radius:20px;width:90%;max-width:340px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .4s ease;text-align:center;">
@@ -314,7 +331,7 @@
       </div>
     </div>
   </div>
- 
+
   <!-- PRIVACY ALERT POPUP -->
   <div id="privacy-popup" class="overlay hidden" onclick="closePrivacyAlert()">
     <div style="background:#fff;border-radius:18px;width:90%;max-width:360px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;" onclick="event.stopPropagation()">
@@ -329,7 +346,7 @@
       </div>
     </div>
   </div>
- 
+
   <!-- PREVIEW MODAL -->
   <div id="preview-modal" class="overlay hidden" onclick="closePreview()">
     <div class="modal" onclick="event.stopPropagation()">
@@ -344,25 +361,25 @@
     </div>
   </div>
 </div>
- 
+
 <script>
 /* ══════════════════════════════════════════════
    ★ Google Apps Script URL ★
    ══════════════════════════════════════════════ */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4kliXeZngzS5tiNeExt9sZyVyVQeXN5PMbCDhYIscnc4Kl6SSKK5r3oZxFkwMX3e6/exec";
- 
+
 const SESSION_TIMEOUT_MS = 10 * 60 * 1000;
 let images = [];
 let sessionTimer = null;
 let warningTimer = null;
- 
+
 /* ───────── Screen Management ───────── */
 function showScreen(id) {
   ['consent-screen', 'main-screen', 'success-screen'].forEach(s => {
     document.getElementById(s).classList.toggle('hidden', s !== id);
   });
 }
- 
+
 function closeCompletePopup() {
   document.getElementById('complete-popup').classList.add('hidden');
   secureCleanup();
@@ -374,24 +391,32 @@ function closeCompletePopup() {
   renderList();
   updateSubmitBtn();
 }
- 
+
 function showPrivacyAlert() {
   document.getElementById('privacy-popup').classList.remove('hidden');
 }
 function closePrivacyAlert() {
   document.getElementById('privacy-popup').classList.add('hidden');
 }
+function closeOrderPopup() {
+  document.getElementById('order-popup').classList.add('hidden');
+}
+
 function confirmPrivacyAlert() {
   document.getElementById('privacy-popup').classList.add('hidden');
   agreeAndStart();
+  // 메인 화면 진입 후 업로드 순서 안내 팝업 표시
+  setTimeout(() => {
+    document.getElementById('order-popup').classList.remove('hidden');
+  }, 300);
 }
- 
+
 function agreeAndStart() {
   showScreen('main-screen');
   resetTimer();
   ['mousedown','touchstart','keydown','scroll'].forEach(e => window.addEventListener(e, resetTimer));
 }
- 
+
 /* ───────── Session Timeout ───────── */
 function resetTimer() {
   document.getElementById('timeout-warn').classList.add('hidden');
@@ -408,13 +433,13 @@ function resetTimer() {
     showScreen('consent-screen');
   }, SESSION_TIMEOUT_MS);
 }
- 
+
 /* ───────── Secure Cleanup ───────── */
 function secureCleanup() {
   for (const img of images) { img.original = null; img.processed = null; }
   images.length = 0;
 }
- 
+
 /* ───────── Scan Effect ───────── */
 function applyScanEffect(canvas) {
   const ctx = canvas.getContext('2d');
@@ -428,7 +453,7 @@ function applyScanEffect(canvas) {
   }
   ctx.putImageData(id, 0, 0);
 }
- 
+
 /* ───────── Image Processing ───────── */
 function processImage(file) {
   return new Promise(resolve => {
@@ -452,7 +477,7 @@ function processImage(file) {
     reader.readAsDataURL(file);
   });
 }
- 
+
 async function handleFiles(files) {
   if (!files || files.length === 0) return;
   document.getElementById('proc-bar').classList.remove('hidden');
@@ -465,13 +490,13 @@ async function handleFiles(files) {
   renderList();
   updateSubmitBtn();
 }
- 
+
 /* ───────── Render Image List ───────── */
 function renderList() {
   const card = document.getElementById('list-card');
   const list = document.getElementById('image-list');
   const countEl = document.getElementById('img-count');
- 
+
   if (images.length === 0) {
     card.classList.add('hidden');
     countEl.classList.add('hidden');
@@ -480,7 +505,7 @@ function renderList() {
   card.classList.remove('hidden');
   countEl.classList.remove('hidden');
   countEl.textContent = images.length;
- 
+
   list.innerHTML = images.map((img, idx) => `
     <div class="item" onclick="openPreview(${idx})">
       <div class="grip"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.3"><circle cx="8" cy="5" r="2"/><circle cx="16" cy="5" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="8" cy="19" r="2"/><circle cx="16" cy="19" r="2"/></svg></div>
@@ -495,14 +520,14 @@ function renderList() {
     </div>
   `).join('');
 }
- 
+
 function moveImg(from, to) {
   if (to < 0 || to >= images.length) return;
   const [item] = images.splice(from, 1);
   images.splice(to, 0, item);
   renderList();
 }
- 
+
 function removeImg(idx) {
   images[idx].original = null;
   images[idx].processed = null;
@@ -510,7 +535,7 @@ function removeImg(idx) {
   renderList();
   updateSubmitBtn();
 }
- 
+
 /* ───────── Preview ───────── */
 function openPreview(idx) {
   document.getElementById('preview-title').textContent = '서류 ' + (idx+1) + ' 미리보기';
@@ -521,7 +546,7 @@ function openPreview(idx) {
 function closePreview() {
   document.getElementById('preview-modal').classList.add('hidden');
 }
- 
+
 /* ───────── Submit Button State ───────── */
 function updateSubmitBtn() {
   const btn = document.getElementById('submit-btn');
@@ -531,14 +556,14 @@ function updateSubmitBtn() {
 }
 document.getElementById('empId').addEventListener('input', updateSubmitBtn);
 document.getElementById('empName').addEventListener('input', updateSubmitBtn);
- 
+
 /* ───────── PDF Builder ───────── */
 function strToBytes(s) { const a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i)&0xff; return a; }
 function dataUrlToUint8(d) { const r = atob(d.split(',')[1]); const a = new Uint8Array(r.length); for (let i = 0; i < r.length; i++) a[i] = r.charCodeAt(i); return a; }
 function u8ToB64(u) { let b = ''; const c = 8192; for (let i = 0; i < u.length; i += c) b += String.fromCharCode.apply(null, u.subarray(i, i+c)); return btoa(b); }
 function sanitize(s) { return s.replace(/[<>"'&\\\/\x00-\x1f]/g,'').trim().substring(0,50); }
 function sanitizeId(s) { return s.replace(/[^a-zA-Z0-9가-힣_-]/g,'').trim().substring(0,20); }
- 
+
 function buildPDF(imgs, empId, empName) {
   const parts=[]; let offset=0; const offsets={};
   function w(s){const b=strToBytes(s);parts.push(b);offset+=b.length;}
@@ -568,28 +593,28 @@ function buildPDF(imgs, empId, empName) {
   for(const p of parts){out.set(p,pos);pos+=p.length;}
   return out;
 }
- 
+
 /* ───────── Submit Handler ───────── */
 async function handleSubmit() {
   const empId = sanitizeId(document.getElementById('empId').value);
   const empName = sanitize(document.getElementById('empName').value);
   if (images.length === 0 || !empId || !empName) return;
- 
+
   const btn = document.getElementById('submit-btn');
   const txt = document.getElementById('submit-text');
   btn.disabled = true;
   txt.innerHTML = '<span class="spinner-w" style="display:inline-block"></span> PDF 생성 중...';
- 
+
   await new Promise(r => setTimeout(r, 200));
- 
+
   const pdfImages = images.map(img => ({
     jpeg: dataUrlToUint8(img.processed), w: img.width, h: img.height
   }));
   const pdfBytes = buildPDF(pdfImages, empId, empName);
   const pdfBase64 = u8ToB64(pdfBytes);
- 
+
   txt.innerHTML = '<span class="spinner-w" style="display:inline-block"></span> 암호화 전송 중...';
- 
+
   // Hidden form + iframe 방식 (Google Apps Script 리다이렉트 대응)
   try {
     const iframeName = 'msf_' + Date.now();
@@ -597,36 +622,36 @@ async function handleSubmit() {
     iframe.name = iframeName;
     iframe.style.display = 'none';
     document.body.appendChild(iframe);
- 
+
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = APPS_SCRIPT_URL;
     form.target = iframeName;
     form.style.display = 'none';
- 
+
     const input = document.createElement('input');
     input.type = 'hidden';
     input.name = 'data';
     input.value = JSON.stringify({ empId, empName, pdfData: pdfBase64 });
     form.appendChild(input);
- 
+
     document.body.appendChild(form);
     form.submit();
- 
+
     // 전송 대기
     await new Promise(r => setTimeout(r, 6000));
- 
+
     try { document.body.removeChild(form); } catch(_){}
     try { document.body.removeChild(iframe); } catch(_){}
   } catch(err) {
     console.error('전송 오류:', err);
   }
- 
+
   // 전송 완료 팝업
   document.getElementById('complete-name').textContent = empId + ' ' + empName;
   document.getElementById('complete-popup').classList.remove('hidden');
 }
- 
+
 // 페이지 이탈 시 메모리 해제
 window.addEventListener('beforeunload', secureCleanup);
 </script>
