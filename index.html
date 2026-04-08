@@ -8,135 +8,88 @@
 <meta http-equiv="Expires" content="0">
 <title>신세계푸드 의료비 제출</title>
 <style>
-  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
-  body { background:#F1F3F7; font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif; color:#1E293B; }
-  input:focus { outline:none; border-color:#3B82F6 !important; box-shadow:0 0 0 3px rgba(59,130,246,.12) !important; }
-  button:active { transform:scale(.97); }
-  button { font-family:inherit; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  @keyframes pulse { 0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)} }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
-  @keyframes slideDown { from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)} }
-
-  .container { max-width:480px; margin:0 auto; min-height:100vh; background:#F1F3F7; }
-
-  /* Consent */
-  .consent-wrap { padding:40px 24px; display:flex; flex-direction:column; align-items:center; min-height:100vh; justify-content:center; animation:fadeUp .5s ease; }
-  .consent-shield { width:72px; height:72px; border-radius:50%; background:#EFF6FF; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; border:2px solid #BFDBFE; }
-  .consent-title { font-size:20px; font-weight:800; color:#0F2940; text-align:center; }
-  .consent-sub { font-size:12px; color:#64748B; margin-top:4px; text-align:center; }
-  .consent-body { background:#fff; border-radius:16px; width:100%; box-shadow:0 1px 4px rgba(0,0,0,.06); margin:24px 0; }
-  .consent-section { padding:14px 20px; border-bottom:1px solid #F1F5F9; }
-  .consent-section:last-child { border:none; }
-  .consent-label { font-size:11.5px; font-weight:750; color:#1D4ED8; margin-bottom:4px; text-transform:uppercase; letter-spacing:.04em; }
-  .consent-text { font-size:13px; color:#475569; line-height:1.6; }
-  .consent-btn { width:100%; padding:16px; font-size:16px; font-weight:800; color:#fff; background:linear-gradient(135deg,#1D4ED8,#2563EB); border:none; border-radius:14px; cursor:pointer; box-shadow:0 4px 16px rgba(37,99,235,.35); }
-  .consent-footer { font-size:10.5px; color:#A0AEC0; margin-top:14px; text-align:center; }
-
-  /* Header */
-  .header { background:linear-gradient(160deg,#0C1929,#162D50 60%,#1E3A5F); position:sticky; top:0; z-index:100; box-shadow:0 4px 20px rgba(12,25,41,.35); }
-  .header-inner { padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
-  .brand { display:flex; align-items:center; gap:12px; }
-  .brand-icon { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,rgba(59,130,246,.5),rgba(59,130,246,.2)); display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.1); }
-  .brand-name { font-size:17px; font-weight:800; color:#fff; letter-spacing:-.03em; }
-  .brand-sub { font-size:11px; color:rgba(255,255,255,.45); margin-top:1px; }
-  .sec-badge { display:flex; align-items:center; gap:5px; color:#34D399; background:rgba(52,211,153,.1); padding:5px 10px; border-radius:20px; border:1px solid rgba(52,211,153,.2); font-size:10px; font-weight:700; }
-
-  /* Main */
-  .main { padding:12px 16px 36px; display:flex; flex-direction:column; gap:12px; }
-  .card { background:#fff; border-radius:16px; padding:16px 16px 14px; box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.02); }
-  .card-title { font-size:13.5px; font-weight:750; color:#0F2940; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-  .title-dot { width:6px; height:6px; border-radius:50%; background:linear-gradient(135deg,#3B82F6,#1D4ED8); flex-shrink:0; }
-  .badge { background:#3B82F6; color:#fff; font-size:10.5px; font-weight:700; padding:1px 8px; border-radius:20px; margin-left:4px; }
-  .hint { font-size:10.5px; font-weight:400; color:#A0AEC0; margin-left:auto; }
-
-  /* Inputs */
-  .row { display:flex; gap:10px; }
-  .field { flex:1; }
-  .lbl { display:block; font-size:11.5px; font-weight:650; color:#64748B; margin-bottom:5px; }
-  .inp { width:100%; padding:11px 12px; font-size:15px; border:1.5px solid #E8ECF1; border-radius:11px; background:#F8FAFC; color:#1E293B; font-family:inherit; transition:all .2s; }
-
-  /* Upload */
-  .upload-row { display:flex; gap:10px; }
-  .up-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:20px 12px 14px; border:2px dashed #D1D9E6; border-radius:14px; background:#FAFBFD; cursor:pointer; color:#475569; }
-  .up-btn-alt { border-color:#BFDBFE; background:#F0F7FF; color:#2563EB; }
-  .up-icon { width:50px; height:50px; border-radius:14px; background:#F1F5F9; display:flex; align-items:center; justify-content:center; }
-  .up-icon-alt { background:#DBEAFE; }
-  .up-label { font-size:12.5px; font-weight:700; }
-  .up-hint { font-size:10px; color:#94A3B8; }
-  .proc { display:flex; align-items:center; gap:10px; margin-top:12px; padding:10px 14px; background:#FFF7ED; border-radius:10px; font-size:12.5px; font-weight:600; color:#C2410C; }
-  .spinner { width:16px; height:16px; border:2.5px solid #FDBA74; border-top-color:#C2410C; border-radius:50%; animation:spin .65s linear infinite; flex-shrink:0; }
-  .spinner-w { width:18px; height:18px; border:2.5px solid rgba(255,255,255,.25); border-top-color:#fff; border-radius:50%; animation:spin .65s linear infinite; }
-
-  /* List */
-  .list { display:flex; flex-direction:column; gap:4px; }
-  .item { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:11px; background:#F8FAFC; border:1.5px solid transparent; cursor:grab; transition:all .15s; }
-  .item.dragging { opacity:.35; border:1.5px dashed #94A3B8; }
-  .item.drag-over { border:1.5px solid #3B82F6; background:#EFF6FF; }
-  .grip { cursor:grab; flex-shrink:0; padding:0 2px; color:#94A3B8; }
-  .num { width:20px; height:20px; border-radius:50%; flex-shrink:0; background:#162D50; color:#fff; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; }
-  .thumb { width:44px; height:44px; border-radius:7px; overflow:hidden; flex-shrink:0; background:#E2E8F0; }
-  .thumb img { width:100%; height:100%; object-fit:cover; }
-  .info { flex:1; min-width:0; }
-  .info-name { font-size:12.5px; font-weight:700; }
-  .info-dim { font-size:10.5px; color:#A0AEC0; margin-top:1px; }
-  .btns { display:flex; align-items:center; gap:1px; flex-shrink:0; }
-  .m-btn { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border:none; border-radius:7px; background:transparent; color:#64748B; cursor:pointer; padding:0; }
-  .d-btn { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border:none; border-radius:7px; background:transparent; color:#EF4444; cursor:pointer; padding:0; margin-left:2px; }
-
-  /* Submit */
-  .submit { width:100%; padding:15px; font-size:15.5px; font-weight:800; color:#fff; background:linear-gradient(135deg,#1D4ED8,#2563EB 50%,#3B82F6); border:none; border-radius:14px; cursor:pointer; box-shadow:0 4px 16px rgba(37,99,235,.35); display:flex; align-items:center; justify-content:center; gap:10px; }
-  .submit:disabled { background:#CBD5E1; box-shadow:none; cursor:not-allowed; }
-
-  /* Security Info */
-  .sec-info { background:#F0FDF4; border-radius:12px; padding:12px 16px; display:flex; flex-direction:column; gap:8px; border:1px solid #BBF7D0; }
-  .sec-row { display:flex; align-items:center; gap:8px; font-size:11.5px; color:#166534; font-weight:500; }
-
-  /* Warning */
-  .warn-bar { display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border-radius:12px; background:#FEF2F2; border:1px solid #FECACA; animation:slideDown .3s ease; }
-  .warn-txt { font-size:12px; color:#991B1B; line-height:1.5; }
-
-  /* Success */
-  .success-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:40px; background:linear-gradient(180deg,#F0FDF4,#F1F3F7); animation:fadeUp .5s ease; }
-  .success-title { font-size:22px; font-weight:800; color:#065F46; margin:20px 0 8px; }
-  .success-msg { font-size:14px; color:#047857; font-weight:600; text-align:center; }
-  .success-hint { font-size:12px; color:#6EE7B7; margin-top:6px; }
-  .success-dots { display:flex; gap:8px; margin-top:28px; }
-  .dot { width:8px; height:8px; border-radius:50%; background:#34D399; animation:pulse 1.2s ease infinite; }
-  .success-auto { font-size:11px; color:#A7F3D0; margin-top:16px; }
-
-  /* Guide */
-  .guide { text-align:center; padding:20px 20px 24px; background:#fff; border-radius:16px; box-shadow:0 1px 4px rgba(0,0,0,.04); }
-  .guide-title { font-size:14px; font-weight:800; color:#475569; margin:12px 0 16px; }
-  .steps { text-align:left; display:flex; flex-direction:column; gap:10px; padding:0 8px; }
-  .step { display:flex; align-items:flex-start; gap:10px; font-size:12.5px; color:#64748B; line-height:1.5; }
-  .sn { width:20px; height:20px; border-radius:50%; flex-shrink:0; background:#EFF6FF; color:#3B82F6; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; }
-
-  .footer { text-align:center; font-size:10.5px; color:#A0AEC0; padding:6px 0 0; line-height:1.6; }
-
-  /* Modal */
-  .overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(6px); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; }
-  .modal { background:#fff; border-radius:18px; width:100%; max-width:440px; max-height:85vh; overflow:auto; box-shadow:0 24px 60px rgba(0,0,0,.25); }
-  .modal-head { display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid #F1F5F9; }
-  .modal-t { font-size:14px; font-weight:750; color:#0F2940; }
-  .modal-x { width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:none; background:#F1F5F9; border-radius:8px; font-size:14px; cursor:pointer; color:#64748B; }
-  .cmp { display:flex; gap:10px; padding:14px; }
-  .cmp-col { flex:1; }
-  .cmp-lbl { font-size:10.5px; font-weight:700; color:#94A3B8; text-align:center; margin-bottom:6px; padding:3px 10px; background:#F1F5F9; border-radius:6px; }
-  .cmp-lbl-b { color:#2563EB; background:#EFF6FF; }
-  .prv-img { width:100%; border-radius:8px; border:1px solid #E8ECF1; }
-
-  .hidden { display:none !important; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+body{background:#F1F3F7;font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;color:#1E293B}
+input:focus{outline:none;border-color:#3B82F6!important;box-shadow:0 0 0 3px rgba(59,130,246,.12)!important}
+button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.container{max-width:480px;margin:0 auto;min-height:100vh;background:#F1F3F7}
+.hidden{display:none!important}
+.consent-wrap{padding:40px 24px;display:flex;flex-direction:column;align-items:center;min-height:100vh;justify-content:center;animation:fadeUp .5s ease}
+.consent-shield{width:72px;height:72px;border-radius:50%;background:#EFF6FF;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border:2px solid #BFDBFE}
+.consent-title{font-size:20px;font-weight:800;color:#0F2940;text-align:center}
+.consent-sub{font-size:12px;color:#64748B;margin-top:4px;text-align:center}
+.consent-body{background:#fff;border-radius:16px;width:100%;box-shadow:0 1px 4px rgba(0,0,0,.06);margin:24px 0}
+.consent-section{padding:14px 20px;border-bottom:1px solid #F1F5F9}
+.consent-section:last-child{border:none}
+.consent-label{font-size:11.5px;font-weight:750;color:#1D4ED8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.consent-text{font-size:13px;color:#475569;line-height:1.6}
+.consent-btn{width:100%;padding:16px;font-size:16px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1D4ED8,#2563EB);border:none;border-radius:14px;box-shadow:0 4px 16px rgba(37,99,235,.35)}
+.consent-footer{font-size:10.5px;color:#A0AEC0;margin-top:14px;text-align:center}
+.header{background:linear-gradient(160deg,#0C1929,#162D50 60%,#1E3A5F);position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(12,25,41,.35)}
+.header-inner{padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,rgba(59,130,246,.5),rgba(59,130,246,.2));display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.1)}
+.brand-name{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.03em}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px}
+.sec-badge{display:flex;align-items:center;gap:5px;color:#34D399;background:rgba(52,211,153,.1);padding:5px 10px;border-radius:20px;border:1px solid rgba(52,211,153,.2);font-size:10px;font-weight:700}
+.main{padding:12px 16px 36px;display:flex;flex-direction:column;gap:12px}
+.card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.02)}
+.card-title{font-size:13.5px;font-weight:750;color:#0F2940;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.title-dot{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#1D4ED8);flex-shrink:0}
+.row{display:flex;gap:10px}.field{flex:1}
+.lbl{display:block;font-size:11.5px;font-weight:650;color:#64748B;margin-bottom:5px}
+.inp{width:100%;padding:11px 12px;font-size:15px;border:1.5px solid #E8ECF1;border-radius:11px;background:#F8FAFC;color:#1E293B;font-family:inherit;transition:all .2s}
+.type-toggle{display:flex;gap:8px}
+.type-btn{flex:1;padding:12px;border:2px solid #E2E8F0;border-radius:12px;background:#F8FAFC;font-size:13px;font-weight:700;color:#64748B;text-align:center;transition:all .2s}
+.type-btn.active-new{border-color:#1D4ED8;background:#EFF6FF;color:#1D4ED8}
+.type-btn.active-sup{border-color:#7C3AED;background:#F5F3FF;color:#7C3AED}
+.member-card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.02);border-left:4px solid #1D4ED8;margin-bottom:12px}
+.member-card.family{border-left-color:#7C3AED}
+.member-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.member-badge{font-size:11px;font-weight:700;color:#fff;background:#1D4ED8;padding:3px 12px;border-radius:10px}
+.member-badge.family{background:#7C3AED}
+.member-del{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:none;border-radius:8px;background:#FEF2F2;color:#EF4444;font-size:16px}
+.hospital-card{background:#F8FAFC;border-radius:12px;padding:12px;margin-bottom:10px;border:1px solid #E8ECF1}
+.hospital-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.hospital-name{flex:1;padding:8px 10px;font-size:13px;border:1.5px solid #E2E8F0;border-radius:8px;background:#fff;font-family:inherit;color:#1E293B}
+.hospital-del{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:none;border-radius:8px;background:#FEF2F2;color:#EF4444;font-size:14px;flex-shrink:0}
+.doc-slots{display:flex;flex-direction:column;gap:8px}
+.doc-slot{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border-radius:10px;border:1.5px solid #E8ECF1;flex-wrap:wrap}
+.doc-icon{font-size:20px;flex-shrink:0}
+.doc-info{flex:1;min-width:0}
+.doc-label{font-size:12px;font-weight:700;color:#1E293B}
+.doc-count{font-size:10px;color:#94A3B8;margin-top:1px}
+.doc-upload-btn{padding:6px 10px;font-size:11px;font-weight:700;color:#1D4ED8;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px}
+.doc-thumbs{display:flex;gap:4px;width:100%;margin-top:6px;margin-left:36px;flex-wrap:wrap}
+.doc-thumb{width:36px;height:36px;border-radius:6px;overflow:hidden;position:relative;border:1px solid #E2E8F0}
+.doc-thumb img{width:100%;height:100%;object-fit:cover}
+.doc-thumb-del{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:#EF4444;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;cursor:pointer;font-weight:700}
+.add-btn{width:100%;padding:10px;border:2px dashed #CBD5E1;border-radius:12px;background:#FAFBFD;font-size:12.5px;font-weight:700;color:#64748B;display:flex;align-items:center;justify-content:center;gap:6px}
+.add-member-btn{border-color:#DDD6FE;color:#7C3AED;background:#FAFAFF}
+.submit{width:100%;padding:15px;font-size:15.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1D4ED8,#2563EB 50%,#3B82F6);border:none;border-radius:14px;box-shadow:0 4px 16px rgba(37,99,235,.35);display:flex;align-items:center;justify-content:center;gap:10px}
+.submit:disabled{background:#CBD5E1;box-shadow:none;cursor:not-allowed}
+.sec-info{background:#F0FDF4;border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;border:1px solid #BBF7D0}
+.sec-row{display:flex;align-items:center;gap:8px;font-size:11.5px;color:#166534;font-weight:500}
+.footer{text-align:center;font-size:10.5px;color:#A0AEC0;padding:6px 0 0;line-height:1.6}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.spinner-w{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;display:inline-block}
+.guide-card{background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:16px;padding:16px}
+.step{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:#475569;line-height:1.6}
+.sn{min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.warn-bar{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;background:#FEF2F2;border:1px solid #FECACA;animation:slideDown .3s ease}
+.warn-txt{font-size:12px;color:#991B1B;line-height:1.5}
+.proc{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#FFF7ED;border-radius:10px;font-size:12.5px;font-weight:600;color:#C2410C;margin-top:8px}
+.spinner{width:16px;height:16px;border:2.5px solid #FDBA74;border-top-color:#C2410C;border-radius:50%;animation:spin .65s linear infinite;flex-shrink:0}
 </style>
 </head>
 <body>
-
 <div class="container" id="app">
-  <!-- CONSENT SCREEN -->
   <div id="consent-screen" class="consent-wrap">
-    <div class="consent-shield">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    </div>
+    <div class="consent-shield"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
     <div class="consent-title">개인정보 수집·이용 동의</div>
     <div class="consent-sub">신세계푸드 의료비 제출 시스템</div>
     <div class="consent-body">
@@ -150,510 +103,197 @@
     <div class="consent-footer">본 동의는 현재 세션에만 유효하며 별도 저장되지 않습니다</div>
   </div>
 
-  <!-- MAIN SCREEN -->
   <div id="main-screen" class="hidden">
-    <div class="header">
-      <div class="header-inner">
-        <div class="brand">
-          <div class="brand-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div><div class="brand-name">신세계푸드</div><div class="brand-sub">의료비 제출 시스템</div></div>
-        </div>
-        <div class="sec-badge">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          <span>보안연결</span>
-        </div>
-      </div>
-    </div>
+    <div class="header"><div class="header-inner">
+      <div class="brand"><div class="brand-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="brand-name">신세계푸드</div><div class="brand-sub">의료비 제출 시스템</div></div></div>
+      <div class="sec-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><span>보안연결</span></div>
+    </div></div>
 
     <div class="main">
-      <div id="timeout-warn" class="warn-bar hidden">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <div class="warn-txt"><b>1분 후 자동 초기화됩니다</b> — 보안을 위해 무활동 시 데이터가 삭제됩니다. 화면을 터치하면 연장됩니다.</div>
-      </div>
+      <div id="timeout-warn" class="warn-bar hidden"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="warn-txt"><b>1분 후 자동 초기화됩니다</b> — 화면을 터치하면 연장됩니다.</div></div>
 
-      <!-- Employee Info -->
       <div class="card">
         <div class="card-title"><span class="title-dot"></span>제출자 정보</div>
         <div class="row">
-          <div class="field">
-            <label class="lbl">사번</label>
-            <input class="inp" type="text" inputmode="numeric" id="empId" placeholder="000000" oninput="this.value=this.value.replace(/[^a-zA-Z0-9]/g,'').slice(0,20)">
-          </div>
-          <div class="field">
-            <label class="lbl">이름</label>
-            <input class="inp" type="text" id="empName" placeholder="홍길동" oninput="this.value=this.value.replace(/[<>\"'&\\\\/]/g,'').slice(0,20)">
-          </div>
+          <div class="field"><label class="lbl">사번</label><input class="inp" type="text" inputmode="numeric" id="empId" placeholder="000000" oninput="this.value=this.value.replace(/[^a-zA-Z0-9]/g,'').slice(0,20);checkSubmit()"></div>
+          <div class="field"><label class="lbl">이름</label><input class="inp" type="text" id="empName" placeholder="홍길동" oninput="this.value=this.value.replace(/[<>\"'&\\\\/]/g,'').slice(0,20);checkSubmit()"></div>
         </div>
       </div>
 
-      <!-- Upload -->
       <div class="card">
-        <div class="card-title">
-          <span class="title-dot"></span>서류 촬영 / 업로드
-          <span id="img-count" class="badge hidden">0</span>
+        <div class="card-title"><span class="title-dot"></span>제출 유형</div>
+        <div class="type-toggle">
+          <button class="type-btn active-new" id="type-new" onclick="setType('new')">🆕 신규 신청</button>
+          <button class="type-btn" id="type-sup" onclick="setType('supplement')">📎 보완 (추가서류)</button>
         </div>
-        <div class="upload-row">
-          <button class="up-btn" onclick="document.getElementById('cameraInput').click()">
-            <div class="up-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-            <div class="up-label">카메라 촬영</div>
-            <div class="up-hint">서류를 직접 촬영</div>
-          </button>
-          <button class="up-btn up-btn-alt" onclick="document.getElementById('fileInput').click()">
-            <div class="up-icon up-icon-alt"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-            <div class="up-label">갤러리 선택</div>
-            <div class="up-hint">여러 장 선택 가능</div>
-          </button>
-        </div>
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handleFiles(this.files);this.value=''" style="display:none">
-        <input type="file" id="fileInput" accept="image/*" multiple onchange="handleFiles(this.files);this.value=''" style="display:none">
-        <div id="proc-bar" class="proc hidden"><div class="spinner"></div>스캔 보정 처리 중...</div>
       </div>
 
-      <!-- Image List -->
-      <div id="list-card" class="card hidden">
-        <div class="card-title">
-          <span class="title-dot"></span>첨부 서류 순서
-          <span class="hint">▲▼로 정렬</span>
-        </div>
-        <div id="image-list" class="list"></div>
-      </div>
+      <div id="members-area"></div>
+      <button class="add-btn add-member-btn" onclick="addMember()">+ 가족 추가 (배우자, 자녀 등)</button>
+      <div id="proc-bar" class="proc hidden"><div class="spinner"></div>스캔 보정 처리 중...</div>
 
-      <!-- Submit -->
       <button class="submit" id="submit-btn" disabled onclick="handleSubmit()">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         <span id="submit-text">PDF 변환 및 전송</span>
       </button>
 
-      <!-- Security Info -->
       <div class="sec-info">
         <div class="sec-row"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>브라우저 저장소(쿠키·로컬스토리지) 미사용</span></div>
         <div class="sec-row"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><span>HTTPS 암호화 전송</span></div>
         <div class="sec-row"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>10분 무활동 시 자동 데이터 삭제</span></div>
       </div>
 
-      <!-- 이용방법 -->
-      <div class="card" style="background:#F8FAFC; border:1px dashed #CBD5E1;">
-        <div class="card-title" style="margin-bottom:10px;"><span class="title-dot"></span>이용방법</div>
-        <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:#475569;line-height:1.6;">
-          <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">1</span>사번과 이름을 입력합니다</div>
-          <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">2</span>의료비 서류를 카메라로 촬영하거나 갤러리에서 선택합니다</div>
-          <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">3</span><div style="flex:1;">서류 순서를 개인별로 정리해주세요<br><span style="font-size:11.5px;color:#94A3B8;">▲▼ 버튼으로 순서 변경 가능</span></div></div>
-          <div style="display:flex;align-items:flex-start;gap:8px;"><span style="min-width:20px;height:20px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">4</span>하단 전송 버튼을 누르면 PDF로 자동 변환되어 담당자에게 전송됩니다</div>
+      <div class="guide-card">
+        <div class="card-title" style="margin-bottom:10px"><span class="title-dot"></span>이용방법</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="step"><span class="sn">1</span>사번과 이름을 입력합니다</div>
+          <div class="step"><span class="sn">2</span>신규/보완 유형을 선택합니다</div>
+          <div class="step"><span class="sn">3</span><div>서류 종류별로 촬영합니다 (병원·가족 추가 가능)<br><span style="font-size:11px;color:#94A3B8;">진료확인서 → 영수증 → 세부내역서 순서</span></div></div>
+          <div class="step"><span class="sn">4</span>전송 버튼을 누르면 PDF로 자동 변환됩니다</div>
         </div>
       </div>
-
       <div class="footer">사진은 기기 내에서만 보정 처리 · 원본은 서버에 전송되지 않습니다</div>
-    </div>
-  </div>
-
-  <!-- SUCCESS SCREEN -->
-  <div id="success-screen" class="hidden">
-    <div class="success-screen">
-      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      <div class="success-title">전송 완료!</div>
-      <div id="success-msg" class="success-msg"></div>
-      <div class="success-hint">담당자 Google Drive에 안전하게 저장되었습니다</div>
-      <div class="success-dots"><span class="dot"></span><span class="dot" style="animation-delay:.15s"></span><span class="dot" style="animation-delay:.3s"></span></div>
-      <div class="success-auto">메모리 초기화 후 자동으로 돌아갑니다</div>
-    </div>
-  </div>
-
-  <!-- UPLOAD ORDER GUIDE POPUP -->
-  <div id="order-popup" class="overlay hidden">
-    <div style="background:#fff;border-radius:20px;width:92%;max-width:380px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;">
-      <div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);padding:18px 20px;text-align:center;border-bottom:1px solid #BFDBFE;">
-        <div style="font-size:17px;font-weight:800;color:#1E3A5F;">📋 업로드 순서 안내</div>
-        <div style="font-size:11.5px;color:#64748B;margin-top:4px;">아래 순서대로 촬영/업로드 해주세요</div>
-        <div style="font-size:11px;color:#DC2626;font-weight:600;margin-top:6px;background:#FEF2F2;padding:4px 12px;border-radius:8px;display:inline-block;">⚠️ 순서가 맞지 않으면 정산 처리가 지연됩니다</div>
-      </div>
-      <div style="padding:18px 20px;">
-        <!-- 홍길동 -->
-        <div style="margin-bottom:14px;">
-          <div style="display:inline-block;background:#1D4ED8;color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:10px;margin-bottom:8px;">홍길동 (본인)</div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div style="flex:1;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:8px 6px;text-align:center;">
-              <div style="font-size:18px;margin-bottom:3px;">📄</div>
-              <div style="font-size:11px;font-weight:700;color:#1E40AF;">진단서/</div>
-              <div style="font-size:11px;font-weight:700;color:#1E40AF;">진료확인서</div>
-            </div>
-            <div style="color:#94A3B8;font-size:20px;font-weight:700;flex-shrink:0;">→</div>
-            <div style="flex:1;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:8px 6px;text-align:center;">
-              <div style="font-size:18px;margin-bottom:3px;">🧾</div>
-              <div style="font-size:11px;font-weight:700;color:#1E40AF;">영수증</div>
-            </div>
-            <div style="color:#94A3B8;font-size:20px;font-weight:700;flex-shrink:0;">→</div>
-            <div style="flex:1;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:8px 6px;text-align:center;">
-              <div style="font-size:18px;margin-bottom:3px;">📑</div>
-              <div style="font-size:11px;font-weight:700;color:#1E40AF;">세부내역서</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 배우자 -->
-        <div style="margin-bottom:18px;">
-          <div style="display:inline-block;background:#7C3AED;color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:10px;margin-bottom:8px;">배우자</div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div style="flex:1;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:8px 6px;text-align:center;">
-              <div style="font-size:18px;margin-bottom:3px;">📄</div>
-              <div style="font-size:11px;font-weight:700;color:#5B21B6;">진단서/</div>
-              <div style="font-size:11px;font-weight:700;color:#5B21B6;">진료확인서</div>
-            </div>
-            <div style="color:#94A3B8;font-size:20px;font-weight:700;flex-shrink:0;">→</div>
-            <div style="flex:1;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:8px 6px;text-align:center;">
-              <div style="font-size:18px;margin-bottom:3px;">🧾</div>
-              <div style="font-size:11px;font-weight:700;color:#5B21B6;">영수증</div>
-            </div>
-            <div style="color:#94A3B8;font-size:20px;font-weight:700;flex-shrink:0;">→</div>
-            <div style="flex:1;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:8px 6px;text-align:center;">
-              <div style="font-size:18px;margin-bottom:3px;">📑</div>
-              <div style="font-size:11px;font-weight:700;color:#5B21B6;">세부내역서</div>
-            </div>
-          </div>
-        </div>
-
-        <button onclick="closeOrderPopup()" style="width:100%;padding:14px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1D4ED8,#2563EB);border:none;border-radius:12px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(37,99,235,.3);">확인</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- COMPLETE POPUP -->
-  <div id="complete-popup" class="overlay hidden">
-    <div style="background:#fff;border-radius:20px;width:90%;max-width:340px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .4s ease;text-align:center;">
-      <div style="background:linear-gradient(180deg,#F0FDF4,#DCFCE7);padding:28px 24px 20px;">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      </div>
-      <div style="padding:20px 24px 28px;">
-        <div style="font-size:20px;font-weight:800;color:#065F46;margin-bottom:8px;">전송 완료!</div>
-        <div style="font-size:14px;color:#047857;font-weight:600;margin-bottom:4px;"><span id="complete-name"></span>님의</div>
-        <div style="font-size:14px;color:#047857;margin-bottom:16px;">서류가 정상적으로 전송되었습니다.</div>
-        <div style="font-size:11.5px;color:#6EE7B7;margin-bottom:20px;">담당자 Google Drive에 안전하게 저장되었습니다</div>
-        <button onclick="closeCompletePopup()" style="width:100%;padding:14px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#059669,#10B981);border:none;border-radius:12px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(16,185,129,.3);">확인</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PRIVACY ALERT POPUP -->
-  <div id="privacy-popup" class="overlay hidden" onclick="closePrivacyAlert()">
-    <div style="background:#fff;border-radius:18px;width:90%;max-width:360px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;" onclick="event.stopPropagation()">
-      <div style="background:#FEF2F2;padding:20px 24px;text-align:center;border-bottom:1px solid #FECACA;">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      </div>
-      <div style="padding:24px;text-align:center;">
-        <div style="font-size:17px;font-weight:800;color:#1E293B;margin-bottom:12px;">주민번호 뒷자리 가림 안내</div>
-        <div style="font-size:14px;color:#475569;line-height:1.7;margin-bottom:8px;">서류 촬영 시<br><span style="font-size:16px;font-weight:800;color:#DC2626;">주민번호 뒷자리는 반드시 가려서</span><br>촬영해주세요.</div>
-        <div style="font-size:12px;color:#94A3B8;margin-bottom:20px;">(포스트잇, 손가락 등으로 가린 후 촬영)</div>
-        <button onclick="confirmPrivacyAlert()" style="width:100%;padding:14px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1D4ED8,#2563EB);border:none;border-radius:12px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(37,99,235,.3);">확인했습니다</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PREVIEW MODAL -->
-  <div id="preview-modal" class="overlay hidden" onclick="closePreview()">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-head">
-        <span class="modal-t" id="preview-title">미리보기</span>
-        <button class="modal-x" onclick="closePreview()">✕</button>
-      </div>
-      <div class="cmp">
-        <div class="cmp-col"><div class="cmp-lbl">원본</div><img id="preview-orig" class="prv-img" src="" alt=""></div>
-        <div class="cmp-col"><div class="cmp-lbl cmp-lbl-b">스캔 보정</div><img id="preview-proc" class="prv-img" src="" alt=""></div>
-      </div>
     </div>
   </div>
 </div>
 
-<script>
-/* ══════════════════════════════════════════════
-   ★ Google Apps Script URL ★
-   ══════════════════════════════════════════════ */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4kliXeZngzS5tiNeExt9sZyVyVQeXN5PMbCDhYIscnc4Kl6SSKK5r3oZxFkwMX3e6/exec";
-
-const SESSION_TIMEOUT_MS = 10 * 60 * 1000;
-let images = [];
-let sessionTimer = null;
-let warningTimer = null;
-
-/* ───────── Screen Management ───────── */
-function showScreen(id) {
-  ['consent-screen', 'main-screen', 'success-screen'].forEach(s => {
-    document.getElementById(s).classList.toggle('hidden', s !== id);
-  });
-}
-
-function closeCompletePopup() {
-  document.getElementById('complete-popup').classList.add('hidden');
-  secureCleanup();
-  images = [];
-  document.getElementById('empId').value = '';
-  document.getElementById('empName').value = '';
-  const txt = document.getElementById('submit-text');
-  txt.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> PDF 변환 및 전송';
-  renderList();
-  updateSubmitBtn();
-}
-
-function showPrivacyAlert() {
-  document.getElementById('privacy-popup').classList.remove('hidden');
-}
-function closePrivacyAlert() {
-  document.getElementById('privacy-popup').classList.add('hidden');
-}
-function closeOrderPopup() {
-  document.getElementById('order-popup').classList.add('hidden');
-}
-
-function confirmPrivacyAlert() {
-  document.getElementById('privacy-popup').classList.add('hidden');
-  agreeAndStart();
-  // 메인 화면 진입 후 업로드 순서 안내 팝업 표시
-  setTimeout(() => {
-    document.getElementById('order-popup').classList.remove('hidden');
-  }, 300);
-}
-
-function agreeAndStart() {
-  showScreen('main-screen');
-  resetTimer();
-  ['mousedown','touchstart','keydown','scroll'].forEach(e => window.addEventListener(e, resetTimer));
-}
-
-/* ───────── Session Timeout ───────── */
-function resetTimer() {
-  document.getElementById('timeout-warn').classList.add('hidden');
-  if (warningTimer) clearTimeout(warningTimer);
-  if (sessionTimer) clearTimeout(sessionTimer);
-  warningTimer = setTimeout(() => {
-    document.getElementById('timeout-warn').classList.remove('hidden');
-  }, SESSION_TIMEOUT_MS - 60000);
-  sessionTimer = setTimeout(() => {
-    secureCleanup();
-    images = [];
-    document.getElementById('empId').value = '';
-    document.getElementById('empName').value = '';
-    showScreen('consent-screen');
-  }, SESSION_TIMEOUT_MS);
-}
-
-/* ───────── Secure Cleanup ───────── */
-function secureCleanup() {
-  for (const img of images) { img.original = null; img.processed = null; }
-  images.length = 0;
-}
-
-/* ───────── Scan Effect ───────── */
-function applyScanEffect(canvas) {
-  const ctx = canvas.getContext('2d');
-  const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const d = id.data;
-  for (let i = 0; i < d.length; i += 4) {
-    for (let c = 0; c < 3; c++) {
-      let v = d[i+c]; v = ((v/255 - 0.5) * 1.3 + 0.5) * 255 + 2;
-      d[i+c] = Math.max(0, Math.min(255, v));
-    }
-  }
-  ctx.putImageData(id, 0, 0);
-}
-
-/* ───────── Image Processing ───────── */
-function processImage(file) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        const MAX = 3200;
-        let w = img.width, h = img.height;
-        if (w > MAX || h > MAX) { const s = MAX/Math.max(w,h); w = Math.round(w*s); h = Math.round(h*s); }
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        applyScanEffect(canvas);
-        const processed = canvas.toDataURL('image/jpeg', 0.95);
-        canvas.width = 0; canvas.height = 0;
-        resolve({ id: Date.now()+Math.random(), original: e.target.result, processed, width: w, height: h });
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-async function handleFiles(files) {
-  if (!files || files.length === 0) return;
-  document.getElementById('proc-bar').classList.remove('hidden');
-  const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
-  for (const f of arr) {
-    const r = await processImage(f);
-    images.push(r);
-  }
-  document.getElementById('proc-bar').classList.add('hidden');
-  renderList();
-  updateSubmitBtn();
-}
-
-/* ───────── Render Image List ───────── */
-function renderList() {
-  const card = document.getElementById('list-card');
-  const list = document.getElementById('image-list');
-  const countEl = document.getElementById('img-count');
-
-  if (images.length === 0) {
-    card.classList.add('hidden');
-    countEl.classList.add('hidden');
-    return;
-  }
-  card.classList.remove('hidden');
-  countEl.classList.remove('hidden');
-  countEl.textContent = images.length;
-
-  list.innerHTML = images.map((img, idx) => `
-    <div class="item" onclick="openPreview(${idx})">
-      <div class="grip"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.3"><circle cx="8" cy="5" r="2"/><circle cx="16" cy="5" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="8" cy="19" r="2"/><circle cx="16" cy="19" r="2"/></svg></div>
-      <div class="num">${idx+1}</div>
-      <div class="thumb"><img src="${img.processed}" alt=""></div>
-      <div class="info"><div class="info-name">서류 ${idx+1}</div><div class="info-dim">${img.width}×${img.height} · 스캔보정</div></div>
-      <div class="btns" onclick="event.stopPropagation()">
-        <button class="m-btn" ${idx===0?'disabled style="opacity:.2"':''} onclick="moveImg(${idx},${idx-1})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button>
-        <button class="m-btn" ${idx===images.length-1?'disabled style="opacity:.2"':''} onclick="moveImg(${idx},${idx+1})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
-        <button class="d-btn" onclick="removeImg(${idx})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
-      </div>
+<!-- POPUPS -->
+<div id="order-popup" class="overlay hidden">
+  <div style="background:#fff;border-radius:20px;width:92%;max-width:380px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;">
+    <div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);padding:18px 20px;text-align:center;border-bottom:1px solid #BFDBFE;">
+      <div style="font-size:17px;font-weight:800;color:#1E3A5F;">📋 업로드 순서 안내</div>
+      <div style="font-size:11.5px;color:#64748B;margin-top:4px;">각 병원별로 아래 순서대로 촬영해주세요</div>
+      <div style="font-size:11px;color:#DC2626;font-weight:600;margin-top:6px;background:#FEF2F2;padding:4px 12px;border-radius:8px;display:inline-block;">⚠️ 순서가 맞지 않으면 정산 처리가 지연됩니다</div>
     </div>
-  `).join('');
+    <div style="padding:18px 20px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;">
+        <div style="flex:1;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:8px 6px;text-align:center;"><div style="font-size:18px;margin-bottom:3px;">📄</div><div style="font-size:11px;font-weight:700;color:#1E40AF;">진단서/</div><div style="font-size:11px;font-weight:700;color:#1E40AF;">진료확인서</div></div>
+        <div style="color:#94A3B8;font-size:20px;font-weight:700;">→</div>
+        <div style="flex:1;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:8px 6px;text-align:center;"><div style="font-size:18px;margin-bottom:3px;">🧾</div><div style="font-size:11px;font-weight:700;color:#1E40AF;">영수증</div></div>
+        <div style="color:#94A3B8;font-size:20px;font-weight:700;">→</div>
+        <div style="flex:1;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:8px 6px;text-align:center;"><div style="font-size:18px;margin-bottom:3px;">📑</div><div style="font-size:11px;font-weight:700;color:#1E40AF;">세부내역서</div></div>
+      </div>
+      <div style="font-size:11px;color:#64748B;text-align:center;margin-bottom:16px;line-height:1.6;">병원이 여러 곳이면 <b>"+ 병원 추가"</b><br>가족이 있으면 <b>"+ 가족 추가"</b> 버튼 이용</div>
+      <button onclick="closeOrderPopup()" style="width:100%;padding:14px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1D4ED8,#2563EB);border:none;border-radius:12px;font-family:inherit;box-shadow:0 4px 12px rgba(37,99,235,.3);">확인</button>
+    </div>
+  </div>
+</div>
+
+<div id="complete-popup" class="overlay hidden">
+  <div style="background:#fff;border-radius:20px;width:90%;max-width:340px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .4s ease;text-align:center;">
+    <div style="background:linear-gradient(180deg,#F0FDF4,#DCFCE7);padding:28px 24px 20px;"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <div style="padding:20px 24px 28px;">
+      <div style="font-size:20px;font-weight:800;color:#065F46;margin-bottom:8px;">전송 완료!</div>
+      <div style="font-size:14px;color:#047857;font-weight:600;margin-bottom:4px;"><span id="complete-name"></span>님의</div>
+      <div style="font-size:14px;color:#047857;margin-bottom:16px;">서류가 정상적으로 전송되었습니다.</div>
+      <div style="font-size:11.5px;color:#6EE7B7;margin-bottom:20px;">담당자 Google Drive에 안전하게 저장되었습니다</div>
+      <button onclick="closeCompletePopup()" style="width:100%;padding:14px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#059669,#10B981);border:none;border-radius:12px;font-family:inherit;box-shadow:0 4px 12px rgba(16,185,129,.3);">확인</button>
+    </div>
+  </div>
+</div>
+
+<div id="privacy-popup" class="overlay hidden" onclick="closePrivacyAlert()">
+  <div style="background:#fff;border-radius:18px;width:90%;max-width:360px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;" onclick="event.stopPropagation()">
+    <div style="background:#FEF2F2;padding:20px 24px;text-align:center;border-bottom:1px solid #FECACA;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+    <div style="padding:24px;text-align:center;">
+      <div style="font-size:17px;font-weight:800;color:#1E293B;margin-bottom:12px;">주민번호 뒷자리 가림 안내</div>
+      <div style="font-size:14px;color:#475569;line-height:1.7;margin-bottom:8px;">서류 촬영 시<br><span style="font-size:16px;font-weight:800;color:#DC2626;">주민번호 뒷자리는 반드시 가려서</span><br>촬영해주세요.</div>
+      <div style="font-size:12px;color:#94A3B8;margin-bottom:20px;">(포스트잇, 손가락 등으로 가린 후 촬영)</div>
+      <button onclick="confirmPrivacyAlert()" style="width:100%;padding:14px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1D4ED8,#2563EB);border:none;border-radius:12px;font-family:inherit;box-shadow:0 4px 12px rgba(37,99,235,.3);">확인했습니다</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+
+<script>
+const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycby4kliXeZngzS5tiNeExt9sZyVyVQeXN5PMbCDhYIscnc4Kl6SSKK5r3oZxFkwMX3e6/exec";
+const SESSION_TIMEOUT_MS=10*60*1000;
+let submitType='new',members=[],idC=1,sessionTimer=null,warningTimer=null,pendingUpload=null;
+
+function makeHospital(){return{id:idC++,name:'',docs:{confirm:[],receipt:[],detail:[]}}}
+function initState(){members=[{id:idC++,label:'본인',isFamily:false,hospitals:[makeHospital()]}];submitType='new';setType('new');render();checkSubmit()}
+
+function showScreen(id){['consent-screen','main-screen'].forEach(s=>document.getElementById(s).classList.toggle('hidden',s!==id))}
+function showPrivacyAlert(){document.getElementById('privacy-popup').classList.remove('hidden')}
+function closePrivacyAlert(){document.getElementById('privacy-popup').classList.add('hidden')}
+function confirmPrivacyAlert(){closePrivacyAlert();agreeAndStart();setTimeout(()=>document.getElementById('order-popup').classList.remove('hidden'),300)}
+function closeOrderPopup(){document.getElementById('order-popup').classList.add('hidden')}
+function closeCompletePopup(){document.getElementById('complete-popup').classList.add('hidden');secureCleanup();initState();document.getElementById('empId').value='';document.getElementById('empName').value='';document.getElementById('submit-text').textContent='PDF 변환 및 전송';checkSubmit()}
+
+function agreeAndStart(){showScreen('main-screen');initState();resetTimer();['mousedown','touchstart','keydown','scroll'].forEach(e=>window.addEventListener(e,resetTimer))}
+function resetTimer(){document.getElementById('timeout-warn').classList.add('hidden');if(warningTimer)clearTimeout(warningTimer);if(sessionTimer)clearTimeout(sessionTimer);warningTimer=setTimeout(()=>document.getElementById('timeout-warn').classList.remove('hidden'),SESSION_TIMEOUT_MS-60000);sessionTimer=setTimeout(()=>{secureCleanup();initState();showScreen('consent-screen')},SESSION_TIMEOUT_MS)}
+function secureCleanup(){for(const m of members)for(const h of m.hospitals)for(const t of['confirm','receipt','detail']){for(const d of h.docs[t]){d.original=null;d.processed=null}h.docs[t].length=0}}
+
+function setType(type){submitType=type;document.getElementById('type-new').className='type-btn'+(type==='new'?' active-new':'');document.getElementById('type-sup').className='type-btn'+(type==='supplement'?' active-sup':'')}
+
+function addMember(){const labels=['배우자','자녀1','자녀2','자녀3'];const used=new Set(members.map(m=>m.label));const next=labels.find(l=>!used.has(l))||'가족'+members.length;members.push({id:idC++,label:next,isFamily:true,hospitals:[makeHospital()]});render()}
+function removeMember(mid){const m=members.find(x=>x.id===mid);if(m)for(const h of m.hospitals)for(const t of['confirm','receipt','detail'])for(const d of h.docs[t]){d.original=null;d.processed=null};members=members.filter(x=>x.id!==mid);render();checkSubmit()}
+function addHospital(mid){const m=members.find(x=>x.id===mid);if(m){m.hospitals.push(makeHospital());render()}}
+function removeHospital(mid,hid){const m=members.find(x=>x.id===mid);if(m&&m.hospitals.length>1){const h=m.hospitals.find(x=>x.id===hid);if(h)for(const t of['confirm','receipt','detail'])for(const d of h.docs[t]){d.original=null;d.processed=null};m.hospitals=m.hospitals.filter(x=>x.id!==hid);render();checkSubmit()}}
+function updateHospitalName(mid,hid,val){const m=members.find(x=>x.id===mid);if(m){const h=m.hospitals.find(x=>x.id===hid);if(h)h.name=val}}
+function removeDoc(mid,hid,type,idx){const m=members.find(x=>x.id===mid);if(m){const h=m.hospitals.find(x=>x.id===hid);if(h){const d=h.docs[type][idx];if(d){d.original=null;d.processed=null}h.docs[type].splice(idx,1);render();checkSubmit()}}}
+
+function applyScanEffect(canvas){const ctx=canvas.getContext('2d'),id=ctx.getImageData(0,0,canvas.width,canvas.height),d=id.data;for(let i=0;i<d.length;i+=4)for(let c=0;c<3;c++){let v=d[i+c];v=((v/255-0.5)*1.3+0.5)*255+2;d[i+c]=Math.max(0,Math.min(255,v))}ctx.putImageData(id,0,0)}
+function processImage(file){return new Promise(resolve=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{const MAX=3200;let w=img.width,h=img.height;if(w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);applyScanEffect(canvas);const processed=canvas.toDataURL('image/jpeg',0.95);canvas.width=0;canvas.height=0;resolve({id:Date.now()+Math.random(),original:e.target.result,processed,width:w,height:h})};img.src=e.target.result};reader.readAsDataURL(file)})}
+
+function triggerUpload(mid,hid,type){pendingUpload={mid,hid,type};document.getElementById('fileInput').click()}
+function triggerCamera(mid,hid,type){pendingUpload={mid,hid,type};document.getElementById('cameraInput').click()}
+
+async function handleFileInput(input){if(!pendingUpload||!input.files.length)return;document.getElementById('proc-bar').classList.remove('hidden');const{mid,hid,type}=pendingUpload;const m=members.find(x=>x.id===mid);if(m){const h=m.hospitals.find(x=>x.id===hid);if(h)for(const f of Array.from(input.files).filter(f=>f.type.startsWith('image/'))){const r=await processImage(f);h.docs[type].push(r)}}input.value='';document.getElementById('proc-bar').classList.add('hidden');render();checkSubmit()}
+document.getElementById('fileInput').addEventListener('change',function(){handleFileInput(this)});
+document.getElementById('cameraInput').addEventListener('change',function(){handleFileInput(this)});
+
+const DOC_TYPES=[{key:'confirm',icon:'📄',label:'진단서/진료확인서'},{key:'receipt',icon:'🧾',label:'영수증'},{key:'detail',icon:'📑',label:'세부내역서'}];
+
+function render(){
+  document.getElementById('members-area').innerHTML=members.map(m=>{
+    const isF=m.isFamily;
+    return`<div class="member-card ${isF?'family':''}">
+      <div class="member-header"><span class="member-badge ${isF?'family':''}">${m.label}</span>${isF?`<button class="member-del" onclick="removeMember(${m.id})">✕</button>`:''}</div>
+      ${m.hospitals.map(h=>`<div class="hospital-card">
+        <div class="hospital-header"><span style="font-size:14px">🏥</span><input class="hospital-name" type="text" placeholder="병원명 (예: 삼성서울병원)" value="${h.name}" oninput="updateHospitalName(${m.id},${h.id},this.value)">${m.hospitals.length>1?`<button class="hospital-del" onclick="removeHospital(${m.id},${h.id})">✕</button>`:''}</div>
+        <div class="doc-slots">${DOC_TYPES.map(dt=>{const docs=h.docs[dt.key],cnt=docs.length;return`<div class="doc-slot">
+          <div class="doc-icon">${dt.icon}</div>
+          <div class="doc-info"><div class="doc-label">${dt.label}</div><div class="doc-count">${cnt>0?cnt+'장 첨부':'미첨부'}</div></div>
+          <button class="doc-upload-btn" onclick="triggerCamera(${m.id},${h.id},'${dt.key}')">📷</button>
+          <button class="doc-upload-btn" style="color:#7C3AED;background:#F5F3FF;border-color:#DDD6FE" onclick="triggerUpload(${m.id},${h.id},'${dt.key}')">📁</button>
+          ${cnt>0?`<div class="doc-thumbs">${docs.map((d,di)=>`<div class="doc-thumb"><img src="${d.processed}"><div class="doc-thumb-del" onclick="event.stopPropagation();removeDoc(${m.id},${h.id},'${dt.key}',${di})">✕</div></div>`).join('')}</div>`:''}</div>`}).join('')}</div>
+      </div>`).join('')}
+      <button class="add-btn" style="margin-top:6px" onclick="addHospital(${m.id})">+ 병원 추가</button>
+    </div>`}).join('');
 }
 
-function moveImg(from, to) {
-  if (to < 0 || to >= images.length) return;
-  const [item] = images.splice(from, 1);
-  images.splice(to, 0, item);
-  renderList();
-}
+function checkSubmit(){const empId=document.getElementById('empId').value.trim(),empName=document.getElementById('empName').value.trim();let has=false;for(const m of members)for(const h of m.hospitals)for(const t of['confirm','receipt','detail'])if(h.docs[t].length>0)has=true;document.getElementById('submit-btn').disabled=!(empId&&empName&&has)}
 
-function removeImg(idx) {
-  images[idx].original = null;
-  images[idx].processed = null;
-  images.splice(idx, 1);
-  renderList();
-  updateSubmitBtn();
-}
+function strToBytes(s){const a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i)&0xff;return a}
+function dataUrlToUint8(d){const r=atob(d.split(',')[1]);const a=new Uint8Array(r.length);for(let i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a}
+function u8ToB64(u){let b='';const c=8192;for(let i=0;i<u.length;i+=c)b+=String.fromCharCode.apply(null,u.subarray(i,i+c));return btoa(b)}
+function sanitize(s){return s.replace(/[<>"'&\\\/\x00-\x1f]/g,'').trim().substring(0,50)}
+function sanitizeId(s){return s.replace(/[^a-zA-Z0-9가-힣_-]/g,'').trim().substring(0,20)}
 
-/* ───────── Preview ───────── */
-function openPreview(idx) {
-  document.getElementById('preview-title').textContent = '서류 ' + (idx+1) + ' 미리보기';
-  document.getElementById('preview-orig').src = images[idx].original;
-  document.getElementById('preview-proc').src = images[idx].processed;
-  document.getElementById('preview-modal').classList.remove('hidden');
-}
-function closePreview() {
-  document.getElementById('preview-modal').classList.add('hidden');
-}
+function collectAllImages(){const all=[];for(const m of members)for(const h of m.hospitals)for(const dt of['confirm','receipt','detail'])for(const d of h.docs[dt])all.push(d);return all}
 
-/* ───────── Submit Button State ───────── */
-function updateSubmitBtn() {
-  const btn = document.getElementById('submit-btn');
-  const empId = document.getElementById('empId').value.trim();
-  const empName = document.getElementById('empName').value.trim();
-  btn.disabled = !(images.length > 0 && empId && empName);
-}
-document.getElementById('empId').addEventListener('input', updateSubmitBtn);
-document.getElementById('empName').addEventListener('input', updateSubmitBtn);
+function buildPDF(imgs,empId,empName){const parts=[];let offset=0;const offsets={};function w(s){const b=strToBytes(s);parts.push(b);offset+=b.length}function wb(b){parts.push(b);offset+=b.length}function mark(n){offsets[n]=offset}const N=imgs.length,A4W=595.28,A4H=841.89;w("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");mark(1);w(`1 0 obj\n<< /Title (${empId}_${empName}) /Creator (MediScan) >>\nendobj\n`);mark(2);w("2 0 obj\n<< /Type /Catalog /Pages 3 0 R >>\nendobj\n");mark(3);w(`3 0 obj\n<< /Type /Pages /Kids [${imgs.map((_,i)=>(4+i*3)+" 0 R").join(" ")}] /Count ${N} >>\nendobj\n`);for(let i=0;i<N;i++){const img=imgs[i],po=4+i*3,co=5+i*3,io=6+i*3;const M=28,sc=Math.min((A4W-2*M)/img.w,(A4H-2*M)/img.h);const dw=img.w*sc,dh=img.h*sc,x=(A4W-dw)/2,y=(A4H-dh)/2;const cs=`q\n${dw.toFixed(2)} 0 0 ${dh.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm\n/Im Do\nQ\n`;const csB=strToBytes(cs);mark(po);w(`${po} 0 obj\n<< /Type /Page /Parent 3 0 R /MediaBox [0 0 ${A4W} ${A4H}] /Contents ${co} 0 R /Resources << /XObject << /Im ${io} 0 R >> >> >>\nendobj\n`);mark(co);w(`${co} 0 obj\n<< /Length ${csB.length} >>\nstream\n`);wb(csB);w("\nendstream\nendobj\n");mark(io);w(`${io} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${img.w} /Height ${img.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.jpeg.length} >>\nstream\n`);wb(img.jpeg);w("\nendstream\nendobj\n")}const tot=3+N*3,xo=offset;w(`xref\n0 ${tot+1}\n`);w("0000000000 65535 f \n");for(let i=1;i<=tot;i++)w(`${String(offsets[i]||0).padStart(10,'0')} 00000 n \n`);w(`trailer\n<< /Size ${tot+1} /Root 2 0 R /Info 1 0 R >>\nstartxref\n${xo}\n%%EOF`);let total=0;parts.forEach(p=>total+=p.length);const out=new Uint8Array(total);let pos=0;for(const p of parts){out.set(p,pos);pos+=p.length}return out}
 
-/* ───────── PDF Builder ───────── */
-function strToBytes(s) { const a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i)&0xff; return a; }
-function dataUrlToUint8(d) { const r = atob(d.split(',')[1]); const a = new Uint8Array(r.length); for (let i = 0; i < r.length; i++) a[i] = r.charCodeAt(i); return a; }
-function u8ToB64(u) { let b = ''; const c = 8192; for (let i = 0; i < u.length; i += c) b += String.fromCharCode.apply(null, u.subarray(i, i+c)); return btoa(b); }
-function sanitize(s) { return s.replace(/[<>"'&\\\/\x00-\x1f]/g,'').trim().substring(0,50); }
-function sanitizeId(s) { return s.replace(/[^a-zA-Z0-9가-힣_-]/g,'').trim().substring(0,20); }
-
-function buildPDF(imgs, empId, empName) {
-  const parts=[]; let offset=0; const offsets={};
-  function w(s){const b=strToBytes(s);parts.push(b);offset+=b.length;}
-  function wb(b){parts.push(b);offset+=b.length;}
-  function mark(n){offsets[n]=offset;}
-  const N=imgs.length,A4W=595.28,A4H=841.89;
-  w("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
-  mark(1);w(`1 0 obj\n<< /Title (${empId}_${empName}) /Creator (MediScan) >>\nendobj\n`);
-  mark(2);w("2 0 obj\n<< /Type /Catalog /Pages 3 0 R >>\nendobj\n");
-  mark(3);w(`3 0 obj\n<< /Type /Pages /Kids [${imgs.map((_,i)=>(4+i*3)+" 0 R").join(" ")}] /Count ${N} >>\nendobj\n`);
-  for(let i=0;i<N;i++){
-    const img=imgs[i],po=4+i*3,co=5+i*3,io=6+i*3;
-    const M=28,sc=Math.min((A4W-2*M)/img.w,(A4H-2*M)/img.h);
-    const dw=img.w*sc,dh=img.h*sc,x=(A4W-dw)/2,y=(A4H-dh)/2;
-    const cs=`q\n${dw.toFixed(2)} 0 0 ${dh.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm\n/Im Do\nQ\n`;
-    const csB=strToBytes(cs);
-    mark(po);w(`${po} 0 obj\n<< /Type /Page /Parent 3 0 R /MediaBox [0 0 ${A4W} ${A4H}] /Contents ${co} 0 R /Resources << /XObject << /Im ${io} 0 R >> >> >>\nendobj\n`);
-    mark(co);w(`${co} 0 obj\n<< /Length ${csB.length} >>\nstream\n`);wb(csB);w("\nendstream\nendobj\n");
-    mark(io);w(`${io} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${img.w} /Height ${img.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.jpeg.length} >>\nstream\n`);wb(img.jpeg);w("\nendstream\nendobj\n");
-  }
-  const tot=3+N*3,xo=offset;
-  w(`xref\n0 ${tot+1}\n`);w("0000000000 65535 f \n");
-  for(let i=1;i<=tot;i++) w(`${String(offsets[i]||0).padStart(10,'0')} 00000 n \n`);
-  w(`trailer\n<< /Size ${tot+1} /Root 2 0 R /Info 1 0 R >>\nstartxref\n${xo}\n%%EOF`);
-  let total=0;parts.forEach(p=>total+=p.length);
-  const out=new Uint8Array(total);let pos=0;
-  for(const p of parts){out.set(p,pos);pos+=p.length;}
-  return out;
-}
-
-/* ───────── Submit Handler ───────── */
-async function handleSubmit() {
-  const empId = sanitizeId(document.getElementById('empId').value);
-  const empName = sanitize(document.getElementById('empName').value);
-  if (images.length === 0 || !empId || !empName) return;
-
-  const btn = document.getElementById('submit-btn');
-  const txt = document.getElementById('submit-text');
-  btn.disabled = true;
-  txt.innerHTML = '<span class="spinner-w" style="display:inline-block"></span> PDF 생성 중...';
-
-  await new Promise(r => setTimeout(r, 200));
-
-  const pdfImages = images.map(img => ({
-    jpeg: dataUrlToUint8(img.processed), w: img.width, h: img.height
-  }));
-  const pdfBytes = buildPDF(pdfImages, empId, empName);
-  const pdfBase64 = u8ToB64(pdfBytes);
-
-  txt.innerHTML = '<span class="spinner-w" style="display:inline-block"></span> 암호화 전송 중...';
-
-  // Hidden form + iframe 방식 (Google Apps Script 리다이렉트 대응)
-  try {
-    const iframeName = 'msf_' + Date.now();
-    const iframe = document.createElement('iframe');
-    iframe.name = iframeName;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = APPS_SCRIPT_URL;
-    form.target = iframeName;
-    form.style.display = 'none';
-
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'data';
-    input.value = JSON.stringify({ empId, empName, pdfData: pdfBase64 });
-    form.appendChild(input);
-
-    document.body.appendChild(form);
-    form.submit();
-
-    // 전송 대기
-    await new Promise(r => setTimeout(r, 6000));
-
-    try { document.body.removeChild(form); } catch(_){}
-    try { document.body.removeChild(iframe); } catch(_){}
-  } catch(err) {
-    console.error('전송 오류:', err);
-  }
-
-  // 전송 완료 팝업
-  document.getElementById('complete-name').textContent = empId + ' ' + empName;
+async function handleSubmit(){
+  const empId=sanitizeId(document.getElementById('empId').value),empName=sanitize(document.getElementById('empName').value);
+  const allImages=collectAllImages();if(!empId||!empName||allImages.length===0)return;
+  const btn=document.getElementById('submit-btn'),txt=document.getElementById('submit-text');
+  btn.disabled=true;txt.innerHTML='<span class="spinner-w"></span> PDF 생성 중...';
+  await new Promise(r=>setTimeout(r,200));
+  const pdfImages=allImages.map(img=>({jpeg:dataUrlToUint8(img.processed),w:img.width,h:img.height}));
+  const pdfBytes=buildPDF(pdfImages,empId,empName);
+  const pdfBase64=u8ToB64(pdfBytes);
+  const typeLabel=submitType==='new'?'신규':'보완';
+  txt.innerHTML='<span class="spinner-w"></span> 암호화 전송 중...';
+  try{const iframeName='msf_'+Date.now();const iframe=document.createElement('iframe');iframe.name=iframeName;iframe.style.display='none';document.body.appendChild(iframe);const form=document.createElement('form');form.method='POST';form.action=APPS_SCRIPT_URL;form.target=iframeName;form.style.display='none';const input=document.createElement('input');input.type='hidden';input.name='data';input.value=JSON.stringify({empId,empName,pdfData:pdfBase64,typeLabel});form.appendChild(input);document.body.appendChild(form);form.submit();await new Promise(r=>setTimeout(r,6000));try{document.body.removeChild(form)}catch(_){}try{document.body.removeChild(iframe)}catch(_){}}catch(err){console.error(err)}
+  document.getElementById('complete-name').textContent=empId+' '+empName;
   document.getElementById('complete-popup').classList.remove('hidden');
 }
 
-// 페이지 이탈 시 메모리 해제
-window.addEventListener('beforeunload', secureCleanup);
+window.addEventListener('beforeunload',secureCleanup);
 </script>
 </body>
 </html>
