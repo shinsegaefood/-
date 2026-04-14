@@ -95,7 +95,6 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
     <div class="consent-body">
       <div class="consent-section"><div class="consent-label">수집 항목</div><div class="consent-text">사번, 성명, 의료비 증빙서류 이미지 (서류 내 포함: 생년월일, 주소, 병명·진단내역)<br><span style="color:#DC2626;font-weight:700;">※ 주민번호 뒷자리는 가려서 제출</span></div></div>
       <div class="consent-section"><div class="consent-label">수집 목적</div><div class="consent-text">의료비 복리후생 정산 처리</div></div>
-      <div class="consent-section"><div class="consent-label">보유 기간</div><div class="consent-text">급여 반영 완료 후 3년 보관, 보관기간 종료 시 파기</div></div>
       <div class="consent-section"><div class="consent-label">처리 방식</div><div class="consent-text">기기 내에서 이미지 보정 및 PDF 변환 후 HTTPS 암호화 전송. 브라우저에 쿠키·저장소 데이터가 일절 저장되지 않으며, 브라우저 종료 시 모든 데이터가 즉시 소멸됩니다.</div></div>
       <div class="consent-section" style="border:none"><div class="consent-label">거부 권리</div><div class="consent-text">동의를 거부할 수 있으며, 거부 시 서류를 기존 우편 방식으로 제출하실 수 있습니다.</div></div>
     </div>
@@ -158,6 +157,17 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
 </div>
 
 <!-- POPUPS -->
+<div id="family-popup" class="overlay hidden">
+  <div style="background:#fff;border-radius:20px;width:90%;max-width:340px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;">
+    <div style="padding:18px 20px;border-bottom:1px solid #F1F5F9;text-align:center;">
+      <div style="font-size:16px;font-weight:800;color:#0F2940;">👨‍👩‍👧‍👦 가족 추가</div>
+      <div style="font-size:11.5px;color:#94A3B8;margin-top:4px;">추가할 가족을 선택하세요</div>
+    </div>
+    <div id="family-options" style="padding:14px 20px;display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="padding:0 20px 18px;"><button onclick="closeFamilyPopup()" style="width:100%;padding:12px;font-size:14px;font-weight:700;color:#64748B;background:#F1F5F9;border:none;border-radius:12px;font-family:inherit;">취소</button></div>
+  </div>
+</div>
+
 <div id="order-popup" class="overlay hidden">
   <div style="background:#fff;border-radius:20px;width:92%;max-width:380px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;">
     <div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);padding:18px 20px;text-align:center;border-bottom:1px solid #BFDBFE;">
@@ -174,11 +184,6 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
         <div style="flex:1;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:8px 6px;text-align:center;"><div style="font-size:18px;margin-bottom:3px;">📑</div><div style="font-size:11px;font-weight:700;color:#1E40AF;">세부내역서</div></div>
       </div>
       <div style="font-size:11px;color:#64748B;text-align:center;margin-bottom:16px;line-height:1.6;">병원이 여러 곳이면 <b>"+ 병원 추가"</b><br>가족이 있으면 <b>"+ 가족 추가"</b> 버튼 이용</div>
-      <div style="text-align:center;margin-top:6px;">
-       <div style="font-size:11px;color:#DC2626;font-weight:600;background:#FEF2F2;padding:4px 12px;border-radius:8px;display:inline-block;">
-       동일 병원·동일 병명은 2회차부터 진단서 제출 불필요</div>
-       </div>
-      </div>
       <button onclick="closeOrderPopup()" style="width:100%;padding:14px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1D4ED8,#2563EB);border:none;border-radius:12px;font-family:inherit;box-shadow:0 4px 12px rgba(37,99,235,.3);">확인</button>
     </div>
   </div>
@@ -233,7 +238,21 @@ function secureCleanup(){for(const m of members)for(const h of m.hospitals)for(c
 
 function setType(type){submitType=type;document.getElementById('type-new').className='type-btn'+(type==='new'?' active-new':'');document.getElementById('type-sup').className='type-btn'+(type==='supplement'?' active-sup':'')}
 
-function addMember(){const labels=['배우자','자녀1','자녀2','자녀3'];const used=new Set(members.map(m=>m.label));const next=labels.find(l=>!used.has(l))||'가족'+members.length;members.push({id:idC++,label:next,isFamily:true,hospitals:[makeHospital()]});render()}
+function addMember(){
+  const allLabels=['배우자','자녀1','자녀2','자녀3','자녀4','자녀5'];
+  const used=new Set(members.map(m=>m.label));
+  const available=allLabels.filter(l=>!used.has(l));
+  if(available.length===0){alert('추가 가능한 가족이 없습니다.');return}
+  const opts=document.getElementById('family-options');
+  opts.innerHTML=available.map(l=>`<button onclick="selectFamily('${l}')" style="width:100%;padding:14px;font-size:14px;font-weight:700;color:#5B21B6;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:12px;font-family:inherit;text-align:center;">${l}</button>`).join('');
+  document.getElementById('family-popup').classList.remove('hidden');
+}
+function selectFamily(label){
+  document.getElementById('family-popup').classList.add('hidden');
+  members.push({id:idC++,label:label,isFamily:true,hospitals:[makeHospital()]});
+  render();
+}
+function closeFamilyPopup(){document.getElementById('family-popup').classList.add('hidden')}
 function removeMember(mid){const m=members.find(x=>x.id===mid);if(m)for(const h of m.hospitals)for(const t of['confirm','receipt','detail'])for(const d of h.docs[t]){d.original=null;d.processed=null};members=members.filter(x=>x.id!==mid);render();checkSubmit()}
 function addHospital(mid){const m=members.find(x=>x.id===mid);if(m){m.hospitals.push(makeHospital());render()}}
 function removeHospital(mid,hid){const m=members.find(x=>x.id===mid);if(m&&m.hospitals.length>1){const h=m.hospitals.find(x=>x.id===hid);if(h)for(const t of['confirm','receipt','detail'])for(const d of h.docs[t]){d.original=null;d.processed=null};m.hospitals=m.hospitals.filter(x=>x.id!==hid);render();checkSubmit()}}
@@ -257,6 +276,7 @@ function render(){
     const isF=m.isFamily;
     return`<div class="member-card ${isF?'family':''}">
       <div class="member-header"><span class="member-badge ${isF?'family':''}">${m.label}</span>${isF?`<button class="member-del" onclick="removeMember(${m.id})">✕</button>`:''}</div>
+      ${!isF?'<div style="font-size:10.5px;color:#DC2626;background:#FEF2F2;padding:6px 10px;border-radius:8px;margin-bottom:10px;line-height:1.5;">💡 동일 병원·동일 병명은 2회차 신청부터 진단서 제출 불필요</div>':''}
       ${m.hospitals.map(h=>`<div class="hospital-card">
         <div class="hospital-header"><span style="font-size:14px">🏥</span><input class="hospital-name" type="text" placeholder="병원명 (예: 삼성서울병원)" value="${h.name}" oninput="updateHospitalName(${m.id},${h.id},this.value)">${m.hospitals.length>1?`<button class="hospital-del" onclick="removeHospital(${m.id},${h.id})">✕</button>`:''}</div>
         <div class="doc-slots">${DOC_TYPES.map(dt=>{const docs=h.docs[dt.key],cnt=docs.length;return`<div class="doc-slot">
