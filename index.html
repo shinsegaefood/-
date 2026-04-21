@@ -281,7 +281,7 @@ function render(){
         <div class="hospital-header"><span style="font-size:14px">🏥</span><input class="hospital-name" type="text" placeholder="병원명 (예: 삼성서울병원)" value="${h.name}" oninput="updateHospitalName(${m.id},${h.id},this.value)">${m.hospitals.length>1?`<button class="hospital-del" onclick="removeHospital(${m.id},${h.id})">✕</button>`:''}</div>
         <div class="doc-slots">${DOC_TYPES.map(dt=>{const docs=h.docs[dt.key],cnt=docs.length;return`<div class="doc-slot">
           <div class="doc-icon">${dt.icon}</div>
-          <div class="doc-info"><div class="doc-label">${dt.label}</div><div class="doc-count">${cnt>0?cnt+'장 첨부':'미첨부'}</div></div>
+          <div class="doc-info"><div class="doc-label">${dt.label}</div><div class="doc-count">${cnt>0?cnt+'장 첨부':'<span style=color:#CBD5E1>선택</span>'}</div></div>
           <button class="doc-upload-btn" onclick="triggerCamera(${m.id},${h.id},'${dt.key}')">📷</button>
           <button class="doc-upload-btn" style="color:#7C3AED;background:#F5F3FF;border-color:#DDD6FE" onclick="triggerUpload(${m.id},${h.id},'${dt.key}')">📁</button>
           ${cnt>0?`<div class="doc-thumbs">${docs.map((d,di)=>`<div class="doc-thumb"><img src="${d.processed}"><div class="doc-thumb-del" onclick="event.stopPropagation();removeDoc(${m.id},${h.id},'${dt.key}',${di})">✕</div></div>`).join('')}</div>`:''}</div>`}).join('')}</div>
@@ -298,17 +298,60 @@ function u8ToB64(u){let b='';const c=8192;for(let i=0;i<u.length;i+=c)b+=String.
 function sanitize(s){return s.replace(/[<>"'&\\\/\x00-\x1f]/g,'').trim().substring(0,50)}
 function sanitizeId(s){return s.replace(/[^a-zA-Z0-9가-힣_-]/g,'').trim().substring(0,20)}
 
-function collectAllImages(){const all=[];for(const m of members)for(const h of m.hospitals)for(const dt of['confirm','receipt','detail'])for(const d of h.docs[dt])all.push(d);return all}
+function collectAllImages(){
+  const all=[];
+  const dtLabels={confirm:'진단서/진료확인서',receipt:'영수증',detail:'세부내역서'};
+  for(const m of members)
+    for(const h of m.hospitals)
+      for(const dt of['confirm','receipt','detail'])
+        for(const d of h.docs[dt])
+          all.push({img:d, memberLabel:m.label, hospitalName:h.name||'병원미입력', docType:dtLabels[dt]});
+  return all;
+}
+
+function stampBanner(imgData, memberLabel, hospitalName, docType){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const bannerH=48;
+      canvas.width=img.width;
+      canvas.height=img.height+bannerH;
+      const ctx=canvas.getContext('2d');
+      // Banner background
+      ctx.fillStyle='#162D50';
+      ctx.fillRect(0,0,canvas.width,bannerH);
+      // Banner text
+      const fontSize=Math.max(14, Math.min(22, Math.round(canvas.width/40)));
+      ctx.font='bold '+fontSize+'px Apple SD Gothic Neo, Malgun Gothic, sans-serif';
+      ctx.fillStyle='#FFFFFF';
+      const text='[ '+memberLabel+' ]  '+hospitalName+'  |  '+docType;
+      ctx.fillText(text, 12, bannerH/2+fontSize/3);
+      // Draw image below banner
+      ctx.drawImage(img,0,bannerH);
+      const result=canvas.toDataURL('image/jpeg',0.95);
+      canvas.width=0;canvas.height=0;
+      resolve({processed:result,width:img.width,height:img.height+bannerH});
+    };
+    img.src=imgData.processed;
+  });
+}
 
 function buildPDF(imgs,empId,empName){const parts=[];let offset=0;const offsets={};function w(s){const b=strToBytes(s);parts.push(b);offset+=b.length}function wb(b){parts.push(b);offset+=b.length}function mark(n){offsets[n]=offset}const N=imgs.length,A4W=595.28,A4H=841.89;w("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");mark(1);w(`1 0 obj\n<< /Title (${empId}_${empName}) /Creator (MediScan) >>\nendobj\n`);mark(2);w("2 0 obj\n<< /Type /Catalog /Pages 3 0 R >>\nendobj\n");mark(3);w(`3 0 obj\n<< /Type /Pages /Kids [${imgs.map((_,i)=>(4+i*3)+" 0 R").join(" ")}] /Count ${N} >>\nendobj\n`);for(let i=0;i<N;i++){const img=imgs[i],po=4+i*3,co=5+i*3,io=6+i*3;const M=28,sc=Math.min((A4W-2*M)/img.w,(A4H-2*M)/img.h);const dw=img.w*sc,dh=img.h*sc,x=(A4W-dw)/2,y=(A4H-dh)/2;const cs=`q\n${dw.toFixed(2)} 0 0 ${dh.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm\n/Im Do\nQ\n`;const csB=strToBytes(cs);mark(po);w(`${po} 0 obj\n<< /Type /Page /Parent 3 0 R /MediaBox [0 0 ${A4W} ${A4H}] /Contents ${co} 0 R /Resources << /XObject << /Im ${io} 0 R >> >> >>\nendobj\n`);mark(co);w(`${co} 0 obj\n<< /Length ${csB.length} >>\nstream\n`);wb(csB);w("\nendstream\nendobj\n");mark(io);w(`${io} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${img.w} /Height ${img.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.jpeg.length} >>\nstream\n`);wb(img.jpeg);w("\nendstream\nendobj\n")}const tot=3+N*3,xo=offset;w(`xref\n0 ${tot+1}\n`);w("0000000000 65535 f \n");for(let i=1;i<=tot;i++)w(`${String(offsets[i]||0).padStart(10,'0')} 00000 n \n`);w(`trailer\n<< /Size ${tot+1} /Root 2 0 R /Info 1 0 R >>\nstartxref\n${xo}\n%%EOF`);let total=0;parts.forEach(p=>total+=p.length);const out=new Uint8Array(total);let pos=0;for(const p of parts){out.set(p,pos);pos+=p.length}return out}
 
 async function handleSubmit(){
   const empId=sanitizeId(document.getElementById('empId').value),empName=sanitize(document.getElementById('empName').value);
-  const allImages=collectAllImages();if(!empId||!empName||allImages.length===0)return;
+  const allItems=collectAllImages();if(!empId||!empName||allItems.length===0)return;
   const btn=document.getElementById('submit-btn'),txt=document.getElementById('submit-text');
   btn.disabled=true;txt.innerHTML='<span class="spinner-w"></span> PDF 생성 중...';
   await new Promise(r=>setTimeout(r,200));
-  const pdfImages=allImages.map(img=>({jpeg:dataUrlToUint8(img.processed),w:img.width,h:img.height}));
+  // 배너 스탬프 적용
+  const stampedImages=[];
+  for(const item of allItems){
+    const stamped=await stampBanner(item.img, item.memberLabel, item.hospitalName, item.docType);
+    stampedImages.push(stamped);
+  }
+  const pdfImages=stampedImages.map(img=>({jpeg:dataUrlToUint8(img.processed),w:img.width,h:img.height}));
   const pdfBytes=buildPDF(pdfImages,empId,empName);
   const pdfBase64=u8ToB64(pdfBytes);
   const typeLabel=submitType==='new'?'신규':'보완';
