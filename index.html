@@ -67,8 +67,9 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
 .doc-thumbs{display:flex;gap:4px;width:100%;margin-top:6px;margin-left:36px;flex-wrap:wrap}
 .doc-thumb{width:36px;height:36px;border-radius:6px;overflow:hidden;position:relative;border:1px solid #E2E8F0}
 .doc-thumb img{width:100%;height:100%;object-fit:cover}
-.doc-thumb-del{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:#EF4444;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;cursor:pointer;font-weight:700}
-.doc-thumb-scanned{position:absolute;bottom:-3px;left:-3px;background:#10B981;color:#fff;font-size:9px;font-weight:800;padding:1px 4px;border-radius:6px;border:1.5px solid #fff;line-height:1.2}
+.doc-thumb-del{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:#EF4444;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;cursor:pointer;font-weight:700;z-index:2}
+.doc-thumb-scanned{position:absolute;bottom:-3px;left:-3px;background:#10B981;color:#fff;font-size:9px;font-weight:800;padding:1px 4px;border-radius:6px;border:1.5px solid #fff;line-height:1.2;pointer-events:none}
+.doc-thumb-edit{position:absolute;bottom:-3px;right:-3px;background:#3B82F6;color:#fff;font-size:9px;font-weight:800;padding:2px 5px;border-radius:6px;border:1.5px solid #fff;line-height:1.2;pointer-events:none}
 .add-btn{width:100%;padding:10px;border:2px dashed #CBD5E1;border-radius:12px;background:#FAFBFD;font-size:12.5px;font-weight:700;color:#64748B;display:flex;align-items:center;justify-content:center;gap:6px}
 .add-member-btn{border-color:#DDD6FE;color:#7C3AED;background:#FAFAFF}
 .submit{width:100%;padding:15px;font-size:15.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1D4ED8,#2563EB 50%,#3B82F6);border:none;border-radius:14px;box-shadow:0 4px 16px rgba(37,99,235,.35);display:flex;align-items:center;justify-content:center;gap:10px}
@@ -149,6 +150,23 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
 </div>
 
 <!-- POPUPS -->
+<div id="crop-popup" class="overlay hidden" style="padding:0;align-items:stretch;flex-direction:column;background:rgba(0,0,0,.92);">
+  <div style="background:#0C1929;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;color:#fff;">
+    <button onclick="closeCropEditor()" style="background:none;border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;padding:4px 8px;">✕ 취소</button>
+    <div style="font-size:14px;font-weight:700;">수동 영역 조정</div>
+    <button onclick="applyCrop()" style="background:#10B981;border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:8px;font-family:inherit;">적용 ✓</button>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+    <canvas id="crop-canvas" style="max-width:100%;max-height:100%;touch-action:none;"></canvas>
+  </div>
+  <div style="background:#162D50;padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+    <button onclick="resetToAuto()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">🔄 자동 감지로 다시</button>
+    <button onclick="resetToFull()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">↻ 전체 영역</button>
+    <button onclick="useOriginal()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">📷 원본 사용</button>
+  </div>
+  <div style="background:#0C1929;padding:8px 16px;color:rgba(255,255,255,.5);font-size:11px;text-align:center;">네 모서리(파란 점)를 드래그하여 영역을 조정하세요</div>
+</div>
+
 <div id="source-popup" class="overlay hidden" onclick="closeSourcePicker()">
   <div style="background:#fff;border-radius:20px;width:90%;max-width:320px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;" onclick="event.stopPropagation()">
     <div style="padding:18px 20px;border-bottom:1px solid #F1F5F9;text-align:center;">
@@ -256,7 +274,7 @@ const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycby4kliXeZngzS5tiN
 const SESSION_TIMEOUT_MS=10*60*1000;
 let submitType='new',members=[],idC=1,sessionTimer=null,warningTimer=null,pendingUpload=null;
 
-function makeHospital(){return{id:idC++,name:'',docs:{confirm:[],receipt:[],detail:[]}}}
+function makeHospital(){return{id:idC++,name:'',visitType:null,docs:{confirm:[],receipt:[],detail:[]}}}
 function initState(){members=[{id:idC++,label:'본인',isFamily:false,hospitals:[makeHospital()]}];submitType='new';setType('new');render();checkSubmit()}
 
 function showScreen(id){['consent-screen','main-screen'].forEach(s=>document.getElementById(s).classList.toggle('hidden',s!==id))}
@@ -291,6 +309,7 @@ function removeMember(mid){const m=members.find(x=>x.id===mid);if(m)for(const h 
 function addHospital(mid){const m=members.find(x=>x.id===mid);if(m){m.hospitals.push(makeHospital());render()}}
 function removeHospital(mid,hid){const m=members.find(x=>x.id===mid);if(m&&m.hospitals.length>1){const h=m.hospitals.find(x=>x.id===hid);if(h)for(const t of['confirm','receipt','detail'])for(const d of h.docs[t]){d.original=null;d.processed=null};m.hospitals=m.hospitals.filter(x=>x.id!==hid);render();checkSubmit()}}
 function updateHospitalName(mid,hid,val){const m=members.find(x=>x.id===mid);if(m){const h=m.hospitals.find(x=>x.id===hid);if(h)h.name=val}}
+function setVisitType(mid,hid,type){const m=members.find(x=>x.id===mid);if(m){const h=m.hospitals.find(x=>x.id===hid);if(h){h.visitType=type;render();checkSubmit()}}}
 function removeDoc(mid,hid,type,idx){const m=members.find(x=>x.id===mid);if(m){const h=m.hospitals.find(x=>x.id===hid);if(h){const d=h.docs[type][idx];if(d){d.original=null;d.processed=null}h.docs[type].splice(idx,1);render();checkSubmit()}}}
 
 let opencvReady=false;
@@ -380,6 +399,220 @@ function recompressForSend(imgDataUrl, totalCount){
   });
 }
 
+// ═══ 수동 크롭 에디터 ═══
+let cropCtx={mid:null,hid:null,type:null,idx:null,img:null,corners:[],scale:1,offsetX:0,offsetY:0,dragIdx:-1};
+
+function openCropEditor(mid,hid,type,idx){
+  const m=members.find(x=>x.id===mid);if(!m)return;
+  const h=m.hospitals.find(x=>x.id===hid);if(!h)return;
+  const d=h.docs[type][idx];if(!d)return;
+  cropCtx.mid=mid;cropCtx.hid=hid;cropCtx.type=type;cropCtx.idx=idx;
+  const img=new Image();
+  img.onload=()=>{
+    cropCtx.img=img;
+    document.getElementById('crop-popup').classList.remove('hidden');
+    setTimeout(()=>{tryAutoDetect();drawCrop()},100);
+  };
+  img.src=d.original;
+}
+
+function closeCropEditor(){
+  document.getElementById('crop-popup').classList.add('hidden');
+  cropCtx.img=null;cropCtx.corners=[];
+}
+
+function tryAutoDetect(){
+  if(!cropCtx.img)return;
+  if(opencvReady&&typeof jscanify!=='undefined'){
+    try{
+      const tmpCanvas=document.createElement('canvas');
+      tmpCanvas.width=cropCtx.img.width;tmpCanvas.height=cropCtx.img.height;
+      tmpCanvas.getContext('2d').drawImage(cropCtx.img,0,0);
+      const scanner=new jscanify();
+      const src=cv.imread(tmpCanvas);
+      const contour=scanner.findPaperContour(src);
+      if(contour){
+        const pts=scanner.getCornerPoints(contour,tmpCanvas);
+        cropCtx.corners=[
+          {x:pts.topLeftCorner.x,y:pts.topLeftCorner.y},
+          {x:pts.topRightCorner.x,y:pts.topRightCorner.y},
+          {x:pts.bottomRightCorner.x,y:pts.bottomRightCorner.y},
+          {x:pts.bottomLeftCorner.x,y:pts.bottomLeftCorner.y}
+        ];
+        src.delete();
+        return;
+      }
+      src.delete();
+    }catch(e){console.log('auto detect fail:',e)}
+  }
+  resetToFull();
+}
+
+function resetToAuto(){tryAutoDetect();drawCrop()}
+function resetToFull(){
+  if(!cropCtx.img)return;
+  const w=cropCtx.img.width,h=cropCtx.img.height;
+  cropCtx.corners=[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];
+  drawCrop();
+}
+
+function drawCrop(){
+  const canvas=document.getElementById('crop-canvas');
+  if(!cropCtx.img)return;
+  const container=canvas.parentElement;
+  const maxW=container.clientWidth-20;
+  const maxH=container.clientHeight-20;
+  const scale=Math.min(maxW/cropCtx.img.width,maxH/cropCtx.img.height,1);
+  cropCtx.scale=scale;
+  canvas.width=cropCtx.img.width*scale;
+  canvas.height=cropCtx.img.height*scale;
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(cropCtx.img,0,0,canvas.width,canvas.height);
+  // Draw overlay
+  ctx.fillStyle='rgba(0,0,0,.4)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Cut out crop area
+  ctx.save();
+  ctx.globalCompositeOperation='destination-out';
+  ctx.beginPath();
+  cropCtx.corners.forEach((c,i)=>{
+    const x=c.x*scale,y=c.y*scale;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.closePath();ctx.fill();
+  ctx.restore();
+  // Redraw image inside crop area
+  ctx.save();
+  ctx.beginPath();
+  cropCtx.corners.forEach((c,i)=>{
+    const x=c.x*scale,y=c.y*scale;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.closePath();ctx.clip();
+  ctx.drawImage(cropCtx.img,0,0,canvas.width,canvas.height);
+  ctx.restore();
+  // Draw quadrilateral lines
+  ctx.strokeStyle='#3B82F6';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  cropCtx.corners.forEach((c,i)=>{
+    const x=c.x*scale,y=c.y*scale;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.closePath();ctx.stroke();
+  // Draw corner handles
+  cropCtx.corners.forEach((c,i)=>{
+    const x=c.x*scale,y=c.y*scale;
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,14,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#3B82F6';ctx.beginPath();ctx.arc(x,y,10,0,Math.PI*2);ctx.fill();
+  });
+}
+
+function getCropPos(e){
+  const canvas=document.getElementById('crop-canvas');
+  const rect=canvas.getBoundingClientRect();
+  const t=e.touches?e.touches[0]:e;
+  return {x:(t.clientX-rect.left)/cropCtx.scale,y:(t.clientY-rect.top)/cropCtx.scale};
+}
+
+function cropStart(e){
+  e.preventDefault();
+  if(!cropCtx.img)return;
+  const p=getCropPos(e);
+  let best=-1,bestDist=Infinity;
+  cropCtx.corners.forEach((c,i)=>{
+    const d=Math.hypot(c.x-p.x,c.y-p.y);
+    if(d<bestDist){bestDist=d;best=i}
+  });
+  if(bestDist*cropCtx.scale<30)cropCtx.dragIdx=best;
+}
+
+function cropMove(e){
+  if(cropCtx.dragIdx<0||!cropCtx.img)return;
+  e.preventDefault();
+  const p=getCropPos(e);
+  cropCtx.corners[cropCtx.dragIdx]={
+    x:Math.max(0,Math.min(cropCtx.img.width,p.x)),
+    y:Math.max(0,Math.min(cropCtx.img.height,p.y))
+  };
+  drawCrop();
+}
+
+function cropEnd(){cropCtx.dragIdx=-1}
+
+function applyCrop(){
+  if(!cropCtx.img||!opencvReady)return;
+  try{
+    const tmpCanvas=document.createElement('canvas');
+    tmpCanvas.width=cropCtx.img.width;tmpCanvas.height=cropCtx.img.height;
+    tmpCanvas.getContext('2d').drawImage(cropCtx.img,0,0);
+    const src=cv.imread(tmpCanvas);
+    // Calculate output size
+    const c=cropCtx.corners;
+    const wTop=Math.hypot(c[1].x-c[0].x,c[1].y-c[0].y);
+    const wBot=Math.hypot(c[2].x-c[3].x,c[2].y-c[3].y);
+    const hL=Math.hypot(c[3].x-c[0].x,c[3].y-c[0].y);
+    const hR=Math.hypot(c[2].x-c[1].x,c[2].y-c[1].y);
+    const outW=Math.round(Math.max(wTop,wBot));
+    const outH=Math.round(Math.max(hL,hR));
+    const srcPts=cv.matFromArray(4,1,cv.CV_32FC2,[c[0].x,c[0].y,c[1].x,c[1].y,c[2].x,c[2].y,c[3].x,c[3].y]);
+    const dstPts=cv.matFromArray(4,1,cv.CV_32FC2,[0,0,outW,0,outW,outH,0,outH]);
+    const M=cv.getPerspectiveTransform(srcPts,dstPts);
+    const dst=new cv.Mat();
+    cv.warpPerspective(src,dst,M,new cv.Size(outW,outH));
+    const outCanvas=document.createElement('canvas');
+    cv.imshow(outCanvas,dst);
+    applyScanEffect(outCanvas);
+    const processed=outCanvas.toDataURL('image/jpeg',0.92);
+    // Save back
+    const m=members.find(x=>x.id===cropCtx.mid);
+    if(m){
+      const h=m.hospitals.find(x=>x.id===cropCtx.hid);
+      if(h){
+        h.docs[cropCtx.type][cropCtx.idx].processed=processed;
+        h.docs[cropCtx.type][cropCtx.idx].width=outW;
+        h.docs[cropCtx.type][cropCtx.idx].height=outH;
+        h.docs[cropCtx.type][cropCtx.idx].scanned=true;
+        h.docs[cropCtx.type][cropCtx.idx].manuallyEdited=true;
+      }
+    }
+    src.delete();dstPts.delete();srcPts.delete();M.delete();dst.delete();
+    closeCropEditor();render();
+  }catch(e){console.error('crop apply error:',e);alert('보정 적용에 실패했습니다. 다시 시도해주세요.')}
+}
+
+function useOriginal(){
+  const m=members.find(x=>x.id===cropCtx.mid);
+  if(m){
+    const h=m.hospitals.find(x=>x.id===cropCtx.hid);
+    if(h){
+      const d=h.docs[cropCtx.type][cropCtx.idx];
+      if(d){
+        d.processed=d.original;
+        d.width=cropCtx.img.width;
+        d.height=cropCtx.img.height;
+        d.scanned=false;
+        d.manuallyEdited=true;
+      }
+    }
+  }
+  closeCropEditor();render();
+}
+
+// 크롭 캔버스 이벤트 등록 (한 번만)
+setTimeout(()=>{
+  const cc=document.getElementById('crop-canvas');
+  if(cc){
+    cc.addEventListener('mousedown',cropStart);
+    cc.addEventListener('mousemove',cropMove);
+    cc.addEventListener('mouseup',cropEnd);
+    cc.addEventListener('mouseleave',cropEnd);
+    cc.addEventListener('touchstart',cropStart,{passive:false});
+    cc.addEventListener('touchmove',cropMove,{passive:false});
+    cc.addEventListener('touchend',cropEnd);
+  }
+},500);
+
 function openSourcePicker(mid,hid,type){pendingUpload={mid,hid,type};document.getElementById('source-popup').classList.remove('hidden')}
 function closeSourcePicker(){document.getElementById('source-popup').classList.add('hidden')}
 function pickSource(src){closeSourcePicker();if(src==='camera')document.getElementById('cameraInput').click();else document.getElementById('fileInput').click()}
@@ -421,20 +654,54 @@ function render(){
     const isF=m.isFamily;
     return`<div class="member-card ${isF?'family':''}">
       <div class="member-header"><span class="member-badge ${isF?'family':''}">${m.label}</span>${isF?`<button class="member-del" onclick="removeMember(${m.id})">✕</button>`:''}</div>
-      ${!isF?'<div style="font-size:10.5px;color:#DC2626;background:#FEF2F2;padding:6px 10px;border-radius:8px;margin-bottom:10px;line-height:1.5;">💡 동일 병원·동일 병명은 2회차 신청부터 진단서 제출 불필요</div>':''}
+      ${!isF?'<div style="font-size:10.5px;color:#1E40AF;background:#EFF6FF;padding:6px 10px;border-radius:8px;margin-bottom:10px;line-height:1.5;border:1px solid #BFDBFE;">💡 병원별로 <b>최초신청</b> 또는 <b>재진</b>을 선택해주세요</div>':''}
       ${m.hospitals.map(h=>`<div class="hospital-card">
         <div class="hospital-header"><span style="font-size:14px">🏥</span><input class="hospital-name" type="text" placeholder="병원명 (예: 삼성서울병원)" value="${h.name}" oninput="updateHospitalName(${m.id},${h.id},this.value)">${m.hospitals.length>1?`<button class="hospital-del" onclick="removeHospital(${m.id},${h.id})">✕</button>`:''}</div>
-        <div class="doc-slots">${DOC_TYPES.map(dt=>{const docs=h.docs[dt.key],cnt=docs.length;return`<div class="doc-slot">
+        <div style="margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:${h.visitType?'#0F2940':'#DC2626'};margin-bottom:6px;">${h.visitType?'신청 유형':'⚠️ 신청 유형을 선택해주세요 (필수)'}</div>
+          <div style="display:flex;gap:6px;">
+            <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px;background:${h.visitType==='new'?'#EFF6FF':'#fff'};border:1.5px solid ${h.visitType==='new'?'#3B82F6':'#E8ECF1'};border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;color:${h.visitType==='new'?'#1D4ED8':'#64748B'};">
+              <input type="checkbox" ${h.visitType==='new'?'checked':''} onchange="setVisitType(${m.id},${h.id},'new')" style="width:14px;height:14px;cursor:pointer;accent-color:#3B82F6;">
+              <span>🆕 최초신청<br><span style="font-size:9.5px;font-weight:500;color:#94A3B8;">진단서 필수</span></span>
+            </label>
+            <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px;background:${h.visitType==='revisit'?'#F0FDF4':'#fff'};border:1.5px solid ${h.visitType==='revisit'?'#10B981':'#E8ECF1'};border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;color:${h.visitType==='revisit'?'#166534':'#64748B'};">
+              <input type="checkbox" ${h.visitType==='revisit'?'checked':''} onchange="setVisitType(${m.id},${h.id},'revisit')" style="width:14px;height:14px;cursor:pointer;accent-color:#10B981;">
+              <span>🔁 재진<br><span style="font-size:9.5px;font-weight:500;color:#94A3B8;">진단서 불필요</span></span>
+            </label>
+          </div>
+        </div>
+        <div class="doc-slots">${DOC_TYPES.map(dt=>{
+          const docs=h.docs[dt.key],cnt=docs.length;
+          const isRequired=dt.key==='confirm'&&h.visitType==='new';
+          const isDimmed=dt.key==='confirm'&&h.visitType==='revisit';
+          return`<div class="doc-slot" style="${isDimmed?'opacity:.5;':''}">
           <div class="doc-icon">${dt.icon}</div>
-          <div class="doc-info"><div class="doc-label">${dt.label}</div><div class="doc-count">${cnt>0?cnt+'장 첨부':'<span style=color:#CBD5E1>선택</span>'}</div></div>
+          <div class="doc-info"><div class="doc-label">${dt.label}${isRequired?'<span style="color:#DC2626;font-size:10px;margin-left:4px;">*필수</span>':''}</div><div class="doc-count">${cnt>0?cnt+'장 첨부':isRequired?'<span style=color:#DC2626;font-weight:600>미첨부</span>':'<span style=color:#CBD5E1>선택</span>'}</div></div>
           <button class="doc-upload-btn" onclick="openSourcePicker(${m.id},${h.id},'${dt.key}')">📷 첨부</button>
-          ${cnt>0?`<div class="doc-thumbs">${docs.map((d,di)=>`<div class="doc-thumb"><img src="${d.processed}"><div class="doc-thumb-del" onclick="event.stopPropagation();removeDoc(${m.id},${h.id},'${dt.key}',${di})">✕</div>${d.scanned?'<div class="doc-thumb-scanned">스캔</div>':''}</div>`).join('')}</div>`:''}</div>`}).join('')}</div>
+          ${cnt>0?`<div class="doc-thumbs">${docs.map((d,di)=>`<div class="doc-thumb" onclick="openCropEditor(${m.id},${h.id},'${dt.key}',${di})" style="cursor:pointer" title="탭하여 영역 조정"><img src="${d.processed}"><div class="doc-thumb-del" onclick="event.stopPropagation();removeDoc(${m.id},${h.id},'${dt.key}',${di})">✕</div>${d.scanned?'<div class="doc-thumb-scanned">스캔</div>':''}${d.manuallyEdited?'<div class="doc-thumb-edit">✎</div>':''}</div>`).join('')}<div style="width:100%;font-size:10px;color:#94A3B8;margin-top:2px;">💡 사진을 탭하면 영역 수정 가능</div></div>`:''}</div>`}).join('')}</div>
       </div>`).join('')}
       <button class="add-btn" style="margin-top:6px" onclick="addHospital(${m.id})">+ 병원 추가</button>
     </div>`}).join('');
 }
 
-function checkSubmit(){const empId=document.getElementById('empId').value.trim(),empName=document.getElementById('empName').value.trim();let cnt=0;for(const m of members)for(const h of m.hospitals)for(const t of['confirm','receipt','detail'])cnt+=h.docs[t].length;document.getElementById('submit-btn').disabled=!(empId&&empName&&cnt>0);const tc=document.getElementById('total-count'),tn=document.getElementById('total-num');if(cnt>0){tc.classList.remove('hidden');tn.textContent=cnt}else{tc.classList.add('hidden')}}
+function checkSubmit(){
+  const empId=document.getElementById('empId').value.trim(),empName=document.getElementById('empName').value.trim();
+  let cnt=0, allValid=true, errorMsg='';
+  for(const m of members){
+    for(const h of m.hospitals){
+      let hCnt=0;
+      for(const t of['confirm','receipt','detail']){cnt+=h.docs[t].length;hCnt+=h.docs[t].length}
+      // 첨부물이 있는 병원만 검증
+      if(hCnt>0){
+        if(!h.visitType){allValid=false;errorMsg='신청유형 미선택 병원 있음'}
+        else if(h.visitType==='new' && h.docs.confirm.length===0){allValid=false;errorMsg='진단서 미첨부 병원 있음'}
+      }
+    }
+  }
+  document.getElementById('submit-btn').disabled=!(empId&&empName&&cnt>0&&allValid);
+  const tc=document.getElementById('total-count'),tn=document.getElementById('total-num');
+  if(cnt>0){tc.classList.remove('hidden');tn.innerHTML=cnt+(allValid?'장':'장 <span style=color:#DC2626;font-weight:700>· '+errorMsg+'</span>')}else{tc.classList.add('hidden')}
+}
 
 function strToBytes(s){const a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i)&0xff;return a}
 function dataUrlToUint8(d){const r=atob(d.split(',')[1]);const a=new Uint8Array(r.length);for(let i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a}
