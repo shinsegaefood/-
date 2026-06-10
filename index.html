@@ -429,7 +429,15 @@ function openCropEditor(mid,hid,type,idx){
   img.onload=()=>{
     cropCtx.img=img;
     document.getElementById('crop-popup').classList.remove('hidden');
-    setTimeout(()=>{tryAutoDetect();drawCrop()},100);
+    // 레이아웃 계산 대기 후 그리기
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        resetToFull(); // 기본은 전체 영역으로 시작
+        // OpenCV 준비되어 있으면 자동 감지 시도
+        if(opencvReady)tryAutoDetect();
+        drawCrop();
+      });
+    });
   };
   img.src=d.original;
 }
@@ -440,33 +448,43 @@ function closeCropEditor(){
 }
 
 function tryAutoDetect(){
-  if(!cropCtx.img)return;
-  if(opencvReady&&typeof jscanify!=='undefined'){
-    try{
-      const tmpCanvas=document.createElement('canvas');
-      tmpCanvas.width=cropCtx.img.width;tmpCanvas.height=cropCtx.img.height;
-      tmpCanvas.getContext('2d').drawImage(cropCtx.img,0,0);
-      const scanner=new jscanify();
-      const src=cv.imread(tmpCanvas);
-      const contour=scanner.findPaperContour(src);
-      if(contour){
-        const pts=scanner.getCornerPoints(contour,tmpCanvas);
-        cropCtx.corners=[
-          {x:pts.topLeftCorner.x,y:pts.topLeftCorner.y},
-          {x:pts.topRightCorner.x,y:pts.topRightCorner.y},
-          {x:pts.bottomRightCorner.x,y:pts.bottomRightCorner.y},
-          {x:pts.bottomLeftCorner.x,y:pts.bottomLeftCorner.y}
-        ];
-        src.delete();
-        return;
-      }
-      src.delete();
-    }catch(e){console.log('auto detect fail:',e)}
+  if(!cropCtx.img)return false;
+  if(!opencvReady||typeof jscanify==='undefined'){
+    console.log('자동 감지 사용 불가: OpenCV 또는 jscanify 미로딩');
+    return false;
   }
-  resetToFull();
+  try{
+    const tmpCanvas=document.createElement('canvas');
+    tmpCanvas.width=cropCtx.img.width;tmpCanvas.height=cropCtx.img.height;
+    tmpCanvas.getContext('2d').drawImage(cropCtx.img,0,0);
+    const scanner=new jscanify();
+    const src=cv.imread(tmpCanvas);
+    const contour=scanner.findPaperContour(src);
+    if(contour){
+      const pts=scanner.getCornerPoints(contour,tmpCanvas);
+      cropCtx.corners=[
+        {x:pts.topLeftCorner.x,y:pts.topLeftCorner.y},
+        {x:pts.topRightCorner.x,y:pts.topRightCorner.y},
+        {x:pts.bottomRightCorner.x,y:pts.bottomRightCorner.y},
+        {x:pts.bottomLeftCorner.x,y:pts.bottomLeftCorner.y}
+      ];
+      src.delete();
+      return true;
+    }
+    src.delete();
+    return false;
+  }catch(e){console.log('auto detect fail:',e);return false}
 }
 
-function resetToAuto(){tryAutoDetect();drawCrop()}
+function resetToAuto(){
+  const ok=tryAutoDetect();
+  if(!ok){
+    if(!opencvReady){alert('자동 감지 라이브러리 로딩 중입니다.\n잠시 후 다시 시도하거나, 모서리를 직접 드래그하세요.');return}
+    alert('문서 모서리를 자동으로 감지하지 못했습니다.\n모서리를 직접 드래그하여 영역을 지정하세요.');
+    return;
+  }
+  drawCrop();
+}
 function resetToFull(){
   if(!cropCtx.img)return;
   const w=cropCtx.img.width,h=cropCtx.img.height;
@@ -492,10 +510,13 @@ function rotateCropImage(){
 
 function drawCrop(){
   const canvas=document.getElementById('crop-canvas');
-  if(!cropCtx.img)return;
+  if(!cropCtx.img||!canvas)return;
   const container=canvas.parentElement;
-  const maxW=container.clientWidth-20;
-  const maxH=container.clientHeight-20;
+  let maxW=container.clientWidth-20;
+  let maxH=container.clientHeight-20;
+  // 컨테이너 크기 계산 실패 시 뷰포트 기반 fallback
+  if(maxW<=0)maxW=window.innerWidth-32;
+  if(maxH<=0)maxH=window.innerHeight-220;
   const scale=Math.min(maxW/cropCtx.img.width,maxH/cropCtx.img.height,1);
   cropCtx.scale=scale;
   canvas.width=cropCtx.img.width*scale;
@@ -575,30 +596,51 @@ function cropMove(e){
 function cropEnd(){cropCtx.dragIdx=-1}
 
 function applyCrop(){
-  if(!cropCtx.img||!opencvReady)return;
+  if(!cropCtx.img){alert('이미지가 준비되지 않았습니다.');return}
   try{
-    const tmpCanvas=document.createElement('canvas');
-    tmpCanvas.width=cropCtx.img.width;tmpCanvas.height=cropCtx.img.height;
-    tmpCanvas.getContext('2d').drawImage(cropCtx.img,0,0);
-    const src=cv.imread(tmpCanvas);
-    // Calculate output size
     const c=cropCtx.corners;
-    const wTop=Math.hypot(c[1].x-c[0].x,c[1].y-c[0].y);
-    const wBot=Math.hypot(c[2].x-c[3].x,c[2].y-c[3].y);
-    const hL=Math.hypot(c[3].x-c[0].x,c[3].y-c[0].y);
-    const hR=Math.hypot(c[2].x-c[1].x,c[2].y-c[1].y);
-    const outW=Math.round(Math.max(wTop,wBot));
-    const outH=Math.round(Math.max(hL,hR));
-    const srcPts=cv.matFromArray(4,1,cv.CV_32FC2,[c[0].x,c[0].y,c[1].x,c[1].y,c[2].x,c[2].y,c[3].x,c[3].y]);
-    const dstPts=cv.matFromArray(4,1,cv.CV_32FC2,[0,0,outW,0,outW,outH,0,outH]);
-    const M=cv.getPerspectiveTransform(srcPts,dstPts);
-    const dst=new cv.Mat();
-    cv.warpPerspective(src,dst,M,new cv.Size(outW,outH));
-    const outCanvas=document.createElement('canvas');
-    cv.imshow(outCanvas,dst);
+    let outCanvas;let outW,outH;
+    // OpenCV.js 사용 가능하면 원근 보정 적용
+    if(opencvReady&&typeof cv!=='undefined'){
+      try{
+        const tmpCanvas=document.createElement('canvas');
+        tmpCanvas.width=cropCtx.img.width;tmpCanvas.height=cropCtx.img.height;
+        tmpCanvas.getContext('2d').drawImage(cropCtx.img,0,0);
+        const src=cv.imread(tmpCanvas);
+        const wTop=Math.hypot(c[1].x-c[0].x,c[1].y-c[0].y);
+        const wBot=Math.hypot(c[2].x-c[3].x,c[2].y-c[3].y);
+        const hL=Math.hypot(c[3].x-c[0].x,c[3].y-c[0].y);
+        const hR=Math.hypot(c[2].x-c[1].x,c[2].y-c[1].y);
+        outW=Math.round(Math.max(wTop,wBot));
+        outH=Math.round(Math.max(hL,hR));
+        const srcPts=cv.matFromArray(4,1,cv.CV_32FC2,[c[0].x,c[0].y,c[1].x,c[1].y,c[2].x,c[2].y,c[3].x,c[3].y]);
+        const dstPts=cv.matFromArray(4,1,cv.CV_32FC2,[0,0,outW,0,outW,outH,0,outH]);
+        const M=cv.getPerspectiveTransform(srcPts,dstPts);
+        const dst=new cv.Mat();
+        cv.warpPerspective(src,dst,M,new cv.Size(outW,outH));
+        outCanvas=document.createElement('canvas');
+        cv.imshow(outCanvas,dst);
+        src.delete();dstPts.delete();srcPts.delete();M.delete();dst.delete();
+      }catch(cvErr){
+        console.log('OpenCV failed, using fallback:',cvErr);
+        outCanvas=null;
+      }
+    }
+    // OpenCV 실패 또는 미로딩 시 - bounding rect 기반 단순 크롭
+    if(!outCanvas){
+      const xs=c.map(p=>p.x),ys=c.map(p=>p.y);
+      const minX=Math.max(0,Math.min(...xs));
+      const minY=Math.max(0,Math.min(...ys));
+      const maxX=Math.min(cropCtx.img.width,Math.max(...xs));
+      const maxY=Math.min(cropCtx.img.height,Math.max(...ys));
+      outW=Math.round(maxX-minX);outH=Math.round(maxY-minY);
+      if(outW<10||outH<10){alert('영역이 너무 작습니다.');return}
+      outCanvas=document.createElement('canvas');
+      outCanvas.width=outW;outCanvas.height=outH;
+      outCanvas.getContext('2d').drawImage(cropCtx.img,minX,minY,outW,outH,0,0,outW,outH);
+    }
     applyScanEffect(outCanvas);
     const processed=outCanvas.toDataURL('image/jpeg',0.92);
-    // Save back
     const m=members.find(x=>x.id===cropCtx.mid);
     if(m){
       const h=m.hospitals.find(x=>x.id===cropCtx.hid);
@@ -610,9 +652,9 @@ function applyCrop(){
         h.docs[cropCtx.type][cropCtx.idx].manuallyEdited=true;
       }
     }
-    src.delete();dstPts.delete();srcPts.delete();M.delete();dst.delete();
+    outCanvas.width=0;outCanvas.height=0;
     closeCropEditor();render();
-  }catch(e){console.error('crop apply error:',e);alert('보정 적용에 실패했습니다. 다시 시도해주세요.')}
+  }catch(e){console.error('crop apply error:',e);alert('보정 적용에 실패했습니다.\n오류: '+e.message)}
 }
 
 function useOriginal(){
