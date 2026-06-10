@@ -321,7 +321,7 @@ function onOpenCvReady(){
   }
 }
 
-function applyScanEffect(canvas){const ctx=canvas.getContext('2d'),id=ctx.getImageData(0,0,canvas.width,canvas.height),d=id.data;for(let i=0;i<d.length;i+=4)for(let c=0;c<3;c++){let v=d[i+c];v=((v/255-0.5)*1.3+0.5)*255+2;d[i+c]=Math.max(0,Math.min(255,v))}ctx.putImageData(id,0,0)}
+function applyScanEffect(canvas){const ctx=canvas.getContext('2d'),id=ctx.getImageData(0,0,canvas.width,canvas.height),d=id.data;for(let i=0;i<d.length;i+=4)for(let c=0;c<3;c++){let v=d[i+c];v=((v/255-0.5)*1.15+0.5)*255+0;d[i+c]=Math.max(0,Math.min(255,v))}ctx.putImageData(id,0,0)}
 
 // jscanify를 사용한 자동 문서 보정 (실패 시 일반 보정 적용)
 function autoScan(img){
