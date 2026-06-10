@@ -65,9 +65,9 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
 .doc-count{font-size:10px;color:#94A3B8;margin-top:1px}
 .doc-upload-btn{padding:8px 14px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#2563EB,#3B82F6);border:none;border-radius:8px;box-shadow:0 2px 6px rgba(37,99,235,.25)}
 .doc-thumbs{display:flex;gap:4px;width:100%;margin-top:6px;margin-left:36px;flex-wrap:wrap}
-.doc-thumb{width:36px;height:36px;border-radius:6px;overflow:hidden;position:relative;border:1px solid #E2E8F0}
+.doc-thumb{width:44px;height:44px;border-radius:6px;overflow:hidden;position:relative;border:1px solid #E2E8F0}
 .doc-thumb img{width:100%;height:100%;object-fit:cover}
-.doc-thumb-del{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:#EF4444;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;cursor:pointer;font-weight:700;z-index:2}
+.doc-thumb-del{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#EF4444;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;cursor:pointer;font-weight:700;z-index:2;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 .doc-thumb-scanned{position:absolute;bottom:-3px;left:-3px;background:#10B981;color:#fff;font-size:9px;font-weight:800;padding:1px 4px;border-radius:6px;border:1.5px solid #fff;line-height:1.2;pointer-events:none}
 .doc-thumb-edit{position:absolute;bottom:-3px;right:-3px;background:#3B82F6;color:#fff;font-size:9px;font-weight:800;padding:2px 5px;border-radius:6px;border:1.5px solid #fff;line-height:1.2;pointer-events:none}
 .add-btn{width:100%;padding:10px;border:2px dashed #CBD5E1;border-radius:12px;background:#FAFBFD;font-size:12.5px;font-weight:700;color:#64748B;display:flex;align-items:center;justify-content:center;gap:6px}
@@ -161,11 +161,11 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
   </div>
   <div style="background:#162D50;padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
     <button onclick="rotateCropImage()" style="background:rgba(59,130,246,.3);border:1px solid rgba(59,130,246,.5);color:#fff;font-size:12px;font-weight:700;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">↻ 90° 회전</button>
-    <button onclick="resetToAuto()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">🔄 자동 감지</button>
-    <button onclick="resetToFull()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">↻ 전체 영역</button>
-    <button onclick="useOriginal()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">📷 원본 사용</button>
+    <button onclick="resetToAuto()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">📄 종이 찾기</button>
+    <button onclick="resetToFull()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">⛶ 전체 영역</button>
+    <button onclick="useOriginal()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">↺ 처음으로</button>
   </div>
-  <div style="background:#0C1929;padding:8px 16px;color:rgba(255,255,255,.5);font-size:11px;text-align:center;">네 모서리(파란 점)를 드래그하여 영역 조정 · 가로/세로 회전 가능</div>
+  <div style="background:#0C1929;padding:8px 16px;color:rgba(255,255,255,.5);font-size:11px;text-align:center;">네 모서리(파란 점)를 드래그하여 영역 조정</div>
 </div>
 
 <div id="source-popup" class="overlay hidden" onclick="closeSourcePicker()">
@@ -425,21 +425,23 @@ function openCropEditor(mid,hid,type,idx){
   const h=m.hospitals.find(x=>x.id===hid);if(!h)return;
   const d=h.docs[type][idx];if(!d)return;
   cropCtx.mid=mid;cropCtx.hid=hid;cropCtx.type=type;cropCtx.idx=idx;
+  // 이전에 편집한 적이 있으면 편집본을 다시 보여줌 (사용자가 했던 크롭 유지)
+  // 처음 편집이면 원본을 보여줌
+  const sourceImg = d.manuallyEdited ? d.processed : d.original;
   const img=new Image();
   img.onload=()=>{
     cropCtx.img=img;
     document.getElementById('crop-popup').classList.remove('hidden');
-    // 레이아웃 계산 대기 후 그리기
     requestAnimationFrame(()=>{
       requestAnimationFrame(()=>{
-        resetToFull(); // 기본은 전체 영역으로 시작
-        // OpenCV 준비되어 있으면 자동 감지 시도
-        if(opencvReady)tryAutoDetect();
+        resetToFull(); // 이미 편집된 경우 이미지가 곧 편집 결과라 전체영역이 맞음
+        // 처음 편집이고 OpenCV 준비되어 있으면 자동 감지 시도
+        if(!d.manuallyEdited && opencvReady) tryAutoDetect();
         drawCrop();
       });
     });
   };
-  img.src=d.original;
+  img.src=sourceImg;
 }
 
 function closeCropEditor(){
@@ -479,8 +481,8 @@ function tryAutoDetect(){
 function resetToAuto(){
   const ok=tryAutoDetect();
   if(!ok){
-    if(!opencvReady){alert('자동 감지 라이브러리 로딩 중입니다.\n잠시 후 다시 시도하거나, 모서리를 직접 드래그하세요.');return}
-    alert('문서 모서리를 자동으로 감지하지 못했습니다.\n모서리를 직접 드래그하여 영역을 지정하세요.');
+    if(!opencvReady){alert('자동 감지 기능이 아직 준비되지 않았습니다.\n잠시 후 다시 시도하거나, 네 모서리를 직접 드래그해서 영역을 지정해주세요.');return}
+    alert('문서 모서리를 찾을 수 없습니다.\n네 모서리를 직접 드래그해서 영역을 지정해주세요.');
     return;
   }
   drawCrop();
@@ -658,28 +660,30 @@ function applyCrop(){
 }
 
 function useOriginal(){
-  if(!cropCtx.img)return;
-  // 회전이 적용되었을 수 있으므로 현재 cropCtx.img 사용
-  const tmpCanvas=document.createElement('canvas');
-  tmpCanvas.width=cropCtx.img.width;
-  tmpCanvas.height=cropCtx.img.height;
-  tmpCanvas.getContext('2d').drawImage(cropCtx.img,0,0);
+  // 진짜 원본 사진으로 되돌리기
+  if(!cropCtx.mid)return;
   const m=members.find(x=>x.id===cropCtx.mid);
-  if(m){
-    const h=m.hospitals.find(x=>x.id===cropCtx.hid);
-    if(h){
-      const d=h.docs[cropCtx.type][cropCtx.idx];
-      if(d){
-        d.processed=tmpCanvas.toDataURL('image/jpeg',0.92);
-        d.width=cropCtx.img.width;
-        d.height=cropCtx.img.height;
-        d.scanned=false;
-        d.manuallyEdited=true;
-      }
-    }
-  }
-  tmpCanvas.width=0;tmpCanvas.height=0;
-  closeCropEditor();render();
+  if(!m)return;
+  const h=m.hospitals.find(x=>x.id===cropCtx.hid);
+  if(!h)return;
+  const d=h.docs[cropCtx.type][cropCtx.idx];
+  if(!d)return;
+  // 원본 이미지 다시 로드
+  const img=new Image();
+  img.onload=()=>{
+    cropCtx.img=img;
+    // 원본을 저장
+    const tmpCanvas=document.createElement('canvas');
+    tmpCanvas.width=img.width;tmpCanvas.height=img.height;
+    tmpCanvas.getContext('2d').drawImage(img,0,0);
+    d.processed=tmpCanvas.toDataURL('image/jpeg',0.92);
+    d.width=img.width;d.height=img.height;
+    d.scanned=false;
+    d.manuallyEdited=false; // 다음 편집 시 원본 기준으로 시작
+    tmpCanvas.width=0;tmpCanvas.height=0;
+    closeCropEditor();render();
+  };
+  img.src=d.original;
 }
 
 // 크롭 캔버스 이벤트 등록 (한 번만)
