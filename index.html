@@ -129,8 +129,8 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
         <input class="sticky-inp" type="text" inputmode="numeric" id="empId" placeholder="사번" style="max-width:90px;" oninput="this.value=this.value.replace(/[^a-zA-Z0-9]/g,'').slice(0,20);checkSubmit()">
         <input class="sticky-inp" type="text" id="empName" placeholder="이름" style="max-width:80px;" oninput="this.value=this.value.replace(/[<>\"'&\\\\/]/g,'').slice(0,20);checkSubmit()">
         <div class="sticky-type">
-          <button class="sticky-type-btn active-new" id="type-new" onclick="setType('new')">🆕 신규</button>
-          <button class="sticky-type-btn" id="type-sup" onclick="setType('supplement')">📎 보완</button>
+          <button class="sticky-type-btn active-new" id="type-new" onclick="setType('new')">🆕 신규제출</button>
+          <button class="sticky-type-btn" id="type-sup" onclick="setType('supplement')">📎 누락서류제출</button>
         </div>
       </div>
     </div>
@@ -199,7 +199,7 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
       <div style="font-size:13px;font-weight:800;color:#1D4ED8;margin-bottom:10px;">📋 이용방법</div>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
         <div class="step"><span class="sn">1</span>사번과 이름을 입력합니다</div>
-        <div class="step"><span class="sn">2</span>신규/보완 유형을 선택합니다</div>
+        <div class="step"><span class="sn">2</span>신규제출/누락서류제출 유형을 선택합니다</div>
         <div class="step"><span class="sn">3</span><div>서류를 종류별로 촬영합니다<br><span style="font-size:11px;color:#94A3B8;">진료확인서 → 영수증 → 세부내역서 순</span></div></div>
         <div class="step"><span class="sn">4</span>전송 버튼을 누르면 PDF로 자동 변환됩니다</div>
       </div>
@@ -876,7 +876,7 @@ async function handleSubmit(){
   const pdfImages=stampedImages.map(img=>({jpeg:dataUrlToUint8(img.processed),w:img.width,h:img.height}));
   const pdfBytes=buildPDF(pdfImages,empId,empName);
   const pdfBase64=u8ToB64(pdfBytes);
-  const typeLabel=submitType==='new'?'신규':'보완';
+  const typeLabel=submitType==='new'?'신규제출':'누락서류제출';
   txt.innerHTML='<span class="spinner-w"></span> 암호화 전송 중... ('+allItems.length+'장)';
   try{const iframeName='msf_'+Date.now();const iframe=document.createElement('iframe');iframe.name=iframeName;iframe.style.display='none';document.body.appendChild(iframe);const form=document.createElement('form');form.method='POST';form.action=APPS_SCRIPT_URL;form.target=iframeName;form.style.display='none';const input=document.createElement('input');input.type='hidden';input.name='data';input.value=JSON.stringify({empId,empName,pdfData:pdfBase64,typeLabel});form.appendChild(input);document.body.appendChild(form);form.submit();const waitTime=Math.max(6000,allItems.length*1500);await new Promise(r=>setTimeout(r,waitTime));try{document.body.removeChild(form)}catch(_){}try{document.body.removeChild(iframe)}catch(_){}}catch(err){console.error(err)}
   document.getElementById('complete-name').textContent=empId+' '+empName;
