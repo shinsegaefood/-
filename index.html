@@ -126,11 +126,11 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
 
     <div class="sticky-bar">
       <div class="sticky-row">
-        <input class="sticky-inp" type="text" inputmode="numeric" id="empId" placeholder="사번" style="max-width:90px;" oninput="this.value=this.value.replace(/[^a-zA-Z0-9]/g,'').slice(0,20);checkSubmit()">
-        <input class="sticky-inp" type="text" id="empName" placeholder="이름" style="max-width:80px;" oninput="this.value=this.value.replace(/[<>\"'&\\\\/]/g,'').slice(0,20);checkSubmit()">
+        <input class="sticky-inp" type="text" inputmode="numeric" id="empId" placeholder="사번" style="max-width:90px;">
+        <input class="sticky-inp" type="text" id="empName" placeholder="이름" style="max-width:80px;">
         <div class="sticky-type">
-          <button class="sticky-type-btn active-new" id="type-new" onclick="setType('new')">🆕 신규제출</button>
-          <button class="sticky-type-btn" id="type-sup" onclick="setType('supplement')">📎 누락서류제출</button>
+          <button class="sticky-type-btn active-new" id="type-new" onclick="setType('new')">🆕 신규서류</button>
+          <button class="sticky-type-btn" id="type-sup" onclick="setType('supplement')">📎 누락서류</button>
         </div>
       </div>
     </div>
@@ -199,7 +199,7 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
       <div style="font-size:13px;font-weight:800;color:#1D4ED8;margin-bottom:10px;">📋 이용방법</div>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
         <div class="step"><span class="sn">1</span>사번과 이름을 입력합니다</div>
-        <div class="step"><span class="sn">2</span>신규제출/누락서류제출 유형을 선택합니다</div>
+        <div class="step"><span class="sn">2</span>신규서류/누락서류 유형을 선택합니다</div>
         <div class="step"><span class="sn">3</span><div>서류를 종류별로 촬영합니다<br><span style="font-size:11px;color:#94A3B8;">진료확인서 → 영수증 → 세부내역서 순</span></div></div>
         <div class="step"><span class="sn">4</span>전송 버튼을 누르면 PDF로 자동 변환됩니다</div>
       </div>
@@ -659,7 +659,7 @@ function applyCrop(){
       }
     }
     outCanvas.width=0;outCanvas.height=0;
-    closeCropEditor();render();
+    closeCropEditor();render();checkSubmit();
   }catch(e){console.error('crop apply error:',e);alert('보정 적용에 실패했습니다.\n오류: '+e.message)}
 }
 
@@ -685,7 +685,7 @@ function useOriginal(){
     d.scanned=false;
     d.manuallyEdited=false; // 다음 편집 시 원본 기준으로 시작
     tmpCanvas.width=0;tmpCanvas.height=0;
-    closeCropEditor();render();
+    closeCropEditor();render();checkSubmit();
   };
   img.src=d.original;
 }
@@ -792,12 +792,24 @@ function checkSubmit(){
     for(const h of m.hospitals){
       let hCnt=0;
       for(const t of['confirm','receipt','detail']){cnt+=h.docs[t].length;hCnt+=h.docs[t].length}
-      // 첨부물이 있는 병원만 검증
       if(hCnt>0){
         if(!h.visitType){allValid=false;errorMsg='신청유형 미선택 병원 있음'}
         else if(h.visitType==='new' && h.docs.confirm.length===0){allValid=false;errorMsg='진단서 미첨부 병원 있음'}
       }
     }
+  }
+  // 사번/이름 미입력 시 빨간 안내
+  if(cnt>0&&(!empId||!empName)){
+    allValid=false;
+    errorMsg=!empId&&!empName?'사번·이름 미입력':!empId?'사번 미입력':'이름 미입력';
+  }
+  // 사번/이름 칸 시각적 강조
+  const empIdEl=document.getElementById('empId'),empNameEl=document.getElementById('empName');
+  if(empIdEl&&empNameEl){
+    if(cnt>0&&!empId){empIdEl.style.borderColor='#DC2626';empIdEl.style.background='#FEF2F2'}
+    else{empIdEl.style.borderColor='';empIdEl.style.background=''}
+    if(cnt>0&&!empName){empNameEl.style.borderColor='#DC2626';empNameEl.style.background='#FEF2F2'}
+    else{empNameEl.style.borderColor='';empNameEl.style.background=''}
   }
   document.getElementById('submit-btn').disabled=!(empId&&empName&&cnt>0&&allValid);
   const tc=document.getElementById('total-count'),tn=document.getElementById('total-num');
@@ -876,7 +888,7 @@ async function handleSubmit(){
   const pdfImages=stampedImages.map(img=>({jpeg:dataUrlToUint8(img.processed),w:img.width,h:img.height}));
   const pdfBytes=buildPDF(pdfImages,empId,empName);
   const pdfBase64=u8ToB64(pdfBytes);
-  const typeLabel=submitType==='new'?'신규제출':'누락서류제출';
+  const typeLabel=submitType==='new'?'신규서류':'누락서류';
   txt.innerHTML='<span class="spinner-w"></span> 암호화 전송 중... ('+allItems.length+'장)';
   try{const iframeName='msf_'+Date.now();const iframe=document.createElement('iframe');iframe.name=iframeName;iframe.style.display='none';document.body.appendChild(iframe);const form=document.createElement('form');form.method='POST';form.action=APPS_SCRIPT_URL;form.target=iframeName;form.style.display='none';const input=document.createElement('input');input.type='hidden';input.name='data';input.value=JSON.stringify({empId,empName,pdfData:pdfBase64,typeLabel});form.appendChild(input);document.body.appendChild(form);form.submit();const waitTime=Math.max(6000,allItems.length*1500);await new Promise(r=>setTimeout(r,waitTime));try{document.body.removeChild(form)}catch(_){}try{document.body.removeChild(iframe)}catch(_){}}catch(err){console.error(err)}
   document.getElementById('complete-name').textContent=empId+' '+empName;
@@ -884,6 +896,33 @@ async function handleSubmit(){
 }
 
 window.addEventListener('beforeunload',secureCleanup);
+
+// ═══ 입력 필드 이벤트 - 한글 IME 호환 + 다중 이벤트로 견고하게 ═══
+function setupInputHandlers(){
+  const empIdEl=document.getElementById('empId');
+  const empNameEl=document.getElementById('empName');
+  if(!empIdEl||!empNameEl)return;
+
+  // 사번: 영숫자만 허용
+  const handleEmpId=()=>{
+    empIdEl.value=empIdEl.value.replace(/[^a-zA-Z0-9]/g,'').slice(0,20);
+    checkSubmit();
+  };
+  ['input','change','keyup','blur','compositionend'].forEach(ev=>empIdEl.addEventListener(ev,handleEmpId));
+
+  // 이름: XSS 위험 문자 제거 (한글 입력 호환)
+  const handleEmpName=()=>{
+    empNameEl.value=empNameEl.value.replace(/[<>"'&\\\/]/g,'').slice(0,20);
+    checkSubmit();
+  };
+  ['input','change','keyup','blur','compositionend'].forEach(ev=>empNameEl.addEventListener(ev,handleEmpName));
+}
+// DOM 로딩 완료 후 핸들러 등록
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',setupInputHandlers);
+}else{
+  setupInputHandlers();
+}
 </script>
 </body>
 </html>
