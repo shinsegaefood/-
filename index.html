@@ -47,18 +47,27 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
 .type-btn{flex:1;padding:12px;border:2px solid #E2E8F0;border-radius:12px;background:#F8FAFC;font-size:13px;font-weight:700;color:#64748B;text-align:center;transition:all .2s}
 .type-btn.active-new{border-color:#1D4ED8;background:#EFF6FF;color:#1D4ED8}
 .type-btn.active-sup{border-color:#7C3AED;background:#F5F3FF;color:#7C3AED}
-.member-card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.02);border-left:4px solid #1D4ED8;margin-bottom:12px}
-.member-card.family{border-left-color:#7C3AED}
+.member-card{background:linear-gradient(180deg,#EFF6FF,#fff 40%);border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(29,78,216,.08),0 0 0 1px rgba(29,78,216,.08);border-left:5px solid #1D4ED8;margin-bottom:14px}
+.member-card.family{background:linear-gradient(180deg,#F5F3FF,#fff 40%);border-left-color:#7C3AED;box-shadow:0 2px 8px rgba(124,58,237,.08),0 0 0 1px rgba(124,58,237,.08)}
 .member-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.member-badge{font-size:11px;font-weight:700;color:#fff;background:#1D4ED8;padding:3px 12px;border-radius:10px}
-.member-badge.family{background:#7C3AED}
+.member-badge{font-size:11px;font-weight:800;color:#fff;background:#1D4ED8;padding:4px 14px;border-radius:10px;box-shadow:0 2px 4px rgba(29,78,216,.3)}
+.member-badge.family{background:#7C3AED;box-shadow:0 2px 4px rgba(124,58,237,.3)}
 .member-del{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:none;border-radius:8px;background:#FEF2F2;color:#EF4444;font-size:16px}
-.hospital-card{background:#F8FAFC;border-radius:12px;padding:12px;margin-bottom:10px;border:1px solid #E8ECF1}
+.hospital-card{background:#fff;border-radius:12px;padding:12px;margin-bottom:10px;border:1.5px solid #CBD5E1;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 .hospital-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .hospital-name{flex:1;padding:8px 10px;font-size:13px;border:1.5px solid #E2E8F0;border-radius:8px;background:#fff;font-family:inherit;color:#1E293B}
 .hospital-del{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:none;border-radius:8px;background:#FEF2F2;color:#EF4444;font-size:14px;flex-shrink:0}
 .doc-slots{display:flex;flex-direction:column;gap:8px}
-.doc-slot{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border-radius:10px;border:1.5px solid #E8ECF1;flex-wrap:wrap}
+.doc-slot{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-radius:10px;border:2px dashed #CBD5E1;flex-wrap:wrap;transition:all .2s}
+.doc-slot.filled{background:#F0FDF4;border:1.5px solid #86EFAC;border-style:solid}
+.doc-slot.required-empty{background:#FEF2F2;border:1.5px solid #FCA5A5;border-style:solid}
+.sticky-bar{position:sticky;top:62px;z-index:90;background:linear-gradient(180deg,#fff,#F8FAFC);padding:10px 16px;box-shadow:0 4px 12px rgba(0,0,0,.06);border-bottom:1px solid #E2E8F0}
+.sticky-row{display:flex;gap:8px;align-items:center}
+.sticky-inp{flex:1;padding:8px 10px;font-size:14px;border:1.5px solid #E8ECF1;border-radius:9px;background:#fff;color:#1E293B;font-family:inherit;min-width:0}
+.sticky-type{display:flex;gap:4px;background:#F1F5F9;border-radius:9px;padding:2px}
+.sticky-type-btn{padding:7px 10px;font-size:11.5px;font-weight:700;color:#64748B;border:none;background:transparent;border-radius:7px;font-family:inherit;cursor:pointer;white-space:nowrap}
+.sticky-type-btn.active-new{background:#1D4ED8;color:#fff;box-shadow:0 1px 3px rgba(29,78,216,.3)}
+.sticky-type-btn.active-sup{background:#7C3AED;color:#fff;box-shadow:0 1px 3px rgba(124,58,237,.3)}
 .doc-icon{font-size:20px;flex-shrink:0}
 .doc-info{flex:1;min-width:0}
 .doc-label{font-size:12px;font-weight:700;color:#1E293B}
@@ -115,24 +124,19 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
       </button>
     </div></div>
 
+    <div class="sticky-bar">
+      <div class="sticky-row">
+        <input class="sticky-inp" type="text" inputmode="numeric" id="empId" placeholder="사번" style="max-width:90px;" oninput="this.value=this.value.replace(/[^a-zA-Z0-9]/g,'').slice(0,20);checkSubmit()">
+        <input class="sticky-inp" type="text" id="empName" placeholder="이름" style="max-width:80px;" oninput="this.value=this.value.replace(/[<>\"'&\\\\/]/g,'').slice(0,20);checkSubmit()">
+        <div class="sticky-type">
+          <button class="sticky-type-btn active-new" id="type-new" onclick="setType('new')">🆕 신규</button>
+          <button class="sticky-type-btn" id="type-sup" onclick="setType('supplement')">📎 보완</button>
+        </div>
+      </div>
+    </div>
+
     <div class="main">
       <div id="timeout-warn" class="warn-bar hidden"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="warn-txt"><b>1분 후 자동 초기화됩니다</b> — 화면을 터치하면 연장됩니다.</div></div>
-
-      <div class="card">
-        <div class="card-title"><span class="title-dot"></span>제출자 정보</div>
-        <div class="row">
-          <div class="field"><label class="lbl">사번</label><input class="inp" type="text" inputmode="numeric" id="empId" placeholder="000000" oninput="this.value=this.value.replace(/[^a-zA-Z0-9]/g,'').slice(0,20);checkSubmit()"></div>
-          <div class="field"><label class="lbl">이름</label><input class="inp" type="text" id="empName" placeholder="홍길동" oninput="this.value=this.value.replace(/[<>\"'&\\\\/]/g,'').slice(0,20);checkSubmit()"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><span class="title-dot"></span>제출 유형</div>
-        <div class="type-toggle">
-          <button class="type-btn active-new" id="type-new" onclick="setType('new')">🆕 신규 신청</button>
-          <button class="type-btn" id="type-sup" onclick="setType('supplement')">📎 보완 (추가서류)</button>
-        </div>
-      </div>
 
       <div id="members-area"></div>
       <button class="add-btn add-member-btn" onclick="addMember()">+ 가족 추가 (배우자, 자녀 등)</button>
@@ -289,7 +293,7 @@ function agreeAndStart(){showScreen('main-screen');initState();resetTimer();['mo
 function resetTimer(){document.getElementById('timeout-warn').classList.add('hidden');if(warningTimer)clearTimeout(warningTimer);if(sessionTimer)clearTimeout(sessionTimer);warningTimer=setTimeout(()=>document.getElementById('timeout-warn').classList.remove('hidden'),SESSION_TIMEOUT_MS-60000);sessionTimer=setTimeout(()=>{secureCleanup();initState();showScreen('consent-screen')},SESSION_TIMEOUT_MS)}
 function secureCleanup(){for(const m of members)for(const h of m.hospitals)for(const t of['confirm','receipt','detail']){for(const d of h.docs[t]){d.original=null;d.processed=null}h.docs[t].length=0}}
 
-function setType(type){submitType=type;document.getElementById('type-new').className='type-btn'+(type==='new'?' active-new':'');document.getElementById('type-sup').className='type-btn'+(type==='supplement'?' active-sup':'')}
+function setType(type){submitType=type;document.getElementById('type-new').className='sticky-type-btn'+(type==='new'?' active-new':'');document.getElementById('type-sup').className='sticky-type-btn'+(type==='supplement'?' active-sup':'')}
 
 function addMember(){
   const allLabels=['배우자','자녀1','자녀2','자녀3','자녀4','자녀5'];
@@ -757,11 +761,11 @@ function render(){
         <div style="margin-bottom:10px;">
           <div style="font-size:11px;font-weight:700;color:${h.visitType?'#0F2940':'#DC2626'};margin-bottom:6px;">${h.visitType?'신청 유형':'⚠️ 신청 유형을 선택해주세요 (필수)'}</div>
           <div style="display:flex;gap:6px;">
-            <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px;background:${h.visitType==='new'?'#EFF6FF':'#fff'};border:1.5px solid ${h.visitType==='new'?'#3B82F6':'#E8ECF1'};border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;color:${h.visitType==='new'?'#1D4ED8':'#64748B'};">
+            <label style="flex:1;display:flex;align-items:center;gap:6px;padding:11px;background:${h.visitType==='new'?'#EFF6FF':'#fff'};border:2px solid ${h.visitType==='new'?'#3B82F6':'#E2E8F0'};border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:${h.visitType==='new'?'#1D4ED8':'#64748B'};box-shadow:${h.visitType==='new'?'0 2px 6px rgba(59,130,246,.2)':'none'};">
               <input type="checkbox" ${h.visitType==='new'?'checked':''} onchange="setVisitType(${m.id},${h.id},'new')" style="width:14px;height:14px;cursor:pointer;accent-color:#3B82F6;">
               <span>🆕 최초신청<br><span style="font-size:9.5px;font-weight:500;color:#94A3B8;">진단서 필수</span></span>
             </label>
-            <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px;background:${h.visitType==='revisit'?'#F0FDF4':'#fff'};border:1.5px solid ${h.visitType==='revisit'?'#10B981':'#E8ECF1'};border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;color:${h.visitType==='revisit'?'#166534':'#64748B'};">
+            <label style="flex:1;display:flex;align-items:center;gap:6px;padding:11px;background:${h.visitType==='revisit'?'#F0FDF4':'#fff'};border:2px solid ${h.visitType==='revisit'?'#10B981':'#E2E8F0'};border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:${h.visitType==='revisit'?'#166534':'#64748B'};box-shadow:${h.visitType==='revisit'?'0 2px 6px rgba(16,185,129,.2)':'none'};">
               <input type="checkbox" ${h.visitType==='revisit'?'checked':''} onchange="setVisitType(${m.id},${h.id},'revisit')" style="width:14px;height:14px;cursor:pointer;accent-color:#10B981;">
               <span>🔁 재진<br><span style="font-size:9.5px;font-weight:500;color:#94A3B8;">진단서 불필요</span></span>
             </label>
@@ -771,9 +775,9 @@ function render(){
           const docs=h.docs[dt.key],cnt=docs.length;
           const isRequired=dt.key==='confirm'&&h.visitType==='new';
           const isDimmed=dt.key==='confirm'&&h.visitType==='revisit';
-          return`<div class="doc-slot" style="${isDimmed?'opacity:.5;':''}">
+          return`<div class="doc-slot ${cnt>0?'filled':(isRequired?'required-empty':'')}" style="${isDimmed?'opacity:.5;':''}">
           <div class="doc-icon">${dt.icon}</div>
-          <div class="doc-info"><div class="doc-label">${dt.label}${isRequired?'<span style="color:#DC2626;font-size:10px;margin-left:4px;">*필수</span>':''}</div><div class="doc-count">${cnt>0?cnt+'장 첨부':isRequired?'<span style=color:#DC2626;font-weight:600>미첨부</span>':'<span style=color:#CBD5E1>선택</span>'}</div></div>
+          <div class="doc-info"><div class="doc-label">${dt.label}${isRequired?'<span style="color:#DC2626;font-size:10px;margin-left:4px;">*필수</span>':''}</div><div class="doc-count">${cnt>0?'<span style=color:#059669;font-weight:700>✓ '+cnt+'장 첨부</span>':isRequired?'<span style=color:#DC2626;font-weight:600>미첨부</span>':'<span style=color:#94A3B8>선택</span>'}</div></div>
           <button class="doc-upload-btn" onclick="openSourcePicker(${m.id},${h.id},'${dt.key}')">📷 첨부</button>
           ${cnt>0?`<div class="doc-thumbs">${docs.map((d,di)=>`<div class="doc-thumb" onclick="openCropEditor(${m.id},${h.id},'${dt.key}',${di})" style="cursor:pointer" title="탭하여 영역 조정"><img src="${d.processed}"><div class="doc-thumb-del" onclick="event.stopPropagation();removeDoc(${m.id},${h.id},'${dt.key}',${di})">✕</div>${d.scanned?'<div class="doc-thumb-scanned">스캔</div>':''}${d.manuallyEdited?'<div class="doc-thumb-edit">✎</div>':''}</div>`).join('')}<div style="width:100%;font-size:10px;color:#94A3B8;margin-top:2px;">💡 사진을 탭하면 영역 수정 가능</div></div>`:''}</div>`}).join('')}</div>
       </div>`).join('')}
