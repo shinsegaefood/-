@@ -381,29 +381,14 @@ function processImage(file){
     reader.onload=e=>{
       const img=new Image();
       img.onload=()=>{
-        // 0단계: 가로 사진이면 세로로 자동 회전 (PDF 일관성 위해)
-        let srcCanvas=document.createElement('canvas');
-        const isLandscape=img.width>img.height;
-        if(isLandscape){
-          srcCanvas.width=img.height;
-          srcCanvas.height=img.width;
-          const sctx=srcCanvas.getContext('2d');
-          sctx.translate(srcCanvas.width,0);
-          sctx.rotate(Math.PI/2);
-          sctx.drawImage(img,0,0);
-        }else{
-          srcCanvas.width=img.width;
-          srcCanvas.height=img.height;
-          srcCanvas.getContext('2d').drawImage(img,0,0);
-        }
-        const srcW=srcCanvas.width,srcH=srcCanvas.height;
+        // 원본 방향 그대로 유지 (사용자가 회전 필요하면 크롭 에디터에서 수동으로)
+        const srcW=img.width,srcH=img.height;
         const MAX=2400;let w=srcW,h=srcH;
         if(w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
         // 1단계: 리사이즈
         const resizeCanvas=document.createElement('canvas');
         resizeCanvas.width=w;resizeCanvas.height=h;
-        resizeCanvas.getContext('2d').drawImage(srcCanvas,0,0,w,h);
-        srcCanvas.width=0;srcCanvas.height=0;
+        resizeCanvas.getContext('2d').drawImage(img,0,0,w,h);
         const resizedImg=new Image();
         resizedImg.onload=()=>{
           // 2단계: 문서 자동 감지 + 원근 보정 시도
@@ -422,7 +407,7 @@ function processImage(file){
           const fw=finalCanvas.width,fh=finalCanvas.height;
           resizeCanvas.width=0;resizeCanvas.height=0;
           if(finalCanvas!==resizeCanvas){finalCanvas.width=0;finalCanvas.height=0}
-          resolve({id:Date.now()+Math.random(),original:e.target.result,processed,width:fw,height:fh,scanned:wasScanned,rotated:isLandscape});
+          resolve({id:Date.now()+Math.random(),original:e.target.result,processed,width:fw,height:fh,scanned:wasScanned});
         };
         resizedImg.src=resizeCanvas.toDataURL('image/jpeg',0.95);
       };
