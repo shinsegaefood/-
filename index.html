@@ -96,7 +96,7 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
 .proc{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#FFF7ED;border-radius:10px;font-size:12.5px;font-weight:600;color:#C2410C;margin-top:8px}
 .spinner{width:16px;height:16px;border:2.5px solid #FDBA74;border-top-color:#C2410C;border-radius:50%;animation:spin .65s linear infinite;flex-shrink:0}
 </style>
-<script async src="https://docs.opencv.org/4.8.0/opencv.js" crossorigin="anonymous" referrerpolicy="no-referrer" onload="onOpenCvReady()"></script>
+<script async src="https://docs.opencv.org/4.8.0/opencv.js" referrerpolicy="no-referrer" onload="onOpenCvReady()" onerror="cvLoadFailed=true"></script>
 <script src="https://cdn.jsdelivr.net/gh/puffinsoft/jscanify@1.2.0/src/jscanify.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
@@ -144,6 +144,7 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
       </div>
       <button class="add-btn add-member-btn" onclick="addMember()">+ 가족 추가 (배우자, 자녀 등)</button>
       <div id="total-count" class="hidden" style="text-align:center;font-size:12px;color:#64748B;padding:4px 0;">총 첨부: <span id="total-num">0</span>장</div>
+      <div id="scan-warn" class="hidden" style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:9px 13px;font-size:11.5px;color:#9A3412;line-height:1.5;">⚠ 문서 자동 보정 기능을 불러오지 못했습니다. 사진을 최대한 반듯하게 촬영해 주세요.</div>
       <div id="proc-bar" class="proc hidden"><div class="spinner"></div><span id="proc-text">문서 자동 보정 중...</span></div>
 
       <button class="submit" id="submit-btn" disabled onclick="handleSubmit()">
@@ -323,7 +324,7 @@ function confirmPrivacyAlert(){closePrivacyAlert();agreeAndStart();setTimeout(()
 function closeOrderPopup(){document.getElementById('order-popup').classList.add('hidden')}
 function closeCompletePopup(){document.getElementById('complete-popup').classList.add('hidden');secureCleanup();releaseWakeLock();initState();document.getElementById('empId').value='';document.getElementById('empName').value='';document.getElementById('submit-text').textContent='PDF 변환 및 전송';checkSubmit()}
 
-function agreeAndStart(){showScreen('main-screen');initState();resetTimer();requestWakeLock();['mousedown','touchstart','keydown','scroll'].forEach(e=>window.addEventListener(e,resetTimer))}
+function agreeAndStart(){showScreen('main-screen');initState();resetTimer();requestWakeLock();setTimeout(()=>{if(cvLoadFailed||!opencvReady){const el=document.getElementById('scan-warn');if(el&&cvLoadFailed)el.classList.remove('hidden')}},8000);['mousedown','touchstart','keydown','scroll'].forEach(e=>window.addEventListener(e,resetTimer))}
 function resetTimer(){document.getElementById('timeout-warn').classList.add('hidden');if(warningTimer)clearTimeout(warningTimer);if(sessionTimer)clearTimeout(sessionTimer);warningTimer=setTimeout(()=>document.getElementById('timeout-warn').classList.remove('hidden'),SESSION_TIMEOUT_MS-60000);sessionTimer=setTimeout(()=>{secureCleanup();releaseWakeLock();initState();showScreen('consent-screen')},SESSION_TIMEOUT_MS)}
 function secureCleanup(){for(const m of members)for(const h of m.hospitals)for(const t of['confirm','receipt','detail']){for(const d of h.docs[t]){d.original=null;d.processed=null}h.docs[t].length=0}}
 
@@ -351,7 +352,7 @@ function updateHospitalName(mid,hid,val){const m=members.find(x=>x.id===mid);if(
 function setVisitType(mid,hid,type){const m=members.find(x=>x.id===mid);if(m){const h=m.hospitals.find(x=>x.id===hid);if(h){h.visitType=type;render();checkSubmit()}}}
 function removeDoc(mid,hid,type,idx){const m=members.find(x=>x.id===mid);if(m){const h=m.hospitals.find(x=>x.id===hid);if(h){const d=h.docs[type][idx];if(d){d.original=null;d.processed=null}h.docs[type].splice(idx,1);render();checkSubmit()}}}
 
-let opencvReady=false;
+let opencvReady=false, cvLoadFailed=false;
 function onOpenCvReady(){
   if(typeof cv!=='undefined'){
     if(cv.Mat)opencvReady=true;
@@ -375,20 +376,143 @@ function autoScan(img){
   }catch(e){console.log('scan fallback:',e);return null}
 }
 
+/* ═══ 방향 판별 ═══ */
+
+// 1) EXIF 촬영 방향 읽기
+function readExifOrientation(buf){
+  try{
+    const v=new DataView(buf);
+    if(v.getUint16(0,false)!==0xFFD8)return 0; // JPEG 아님
+    let off=2;
+    const len=v.byteLength;
+    while(off<len-1){
+      const marker=v.getUint16(off,false); off+=2;
+      if(marker===0xFFE1){ // APP1
+        if(v.getUint32(off+2,false)!==0x45786966)return 0; // "Exif"
+        const tiff=off+8;
+        const little=v.getUint16(tiff,false)===0x4949;
+        const dirOff=tiff+v.getUint32(tiff+4,little);
+        const tags=v.getUint16(dirOff,little);
+        for(let i=0;i<tags;i++){
+          const ent=dirOff+2+i*12;
+          if(v.getUint16(ent,little)===0x0112) return v.getUint16(ent+8,little);
+        }
+        return 0;
+      }else if((marker&0xFF00)!==0xFF00){
+        return 0;
+      }else{
+        off+=v.getUint16(off,false);
+      }
+    }
+  }catch(e){}
+  return 0;
+}
+// EXIF 값 → 필요한 회전 각도
+function exifToDeg(o){
+  if(o===6)return 90;
+  if(o===3)return 180;
+  if(o===8)return 270;
+  return 0;
+}
+
+// 2) 글자줄 방향 분석 — 글자줄과 빈 줄이 규칙적으로 번갈아 나오는 축을 찾음
+function textAxisScore(canvas){
+  const MAXD=700;
+  const s=Math.min(1,MAXD/Math.max(canvas.width,canvas.height));
+  const w=Math.max(40,Math.round(canvas.width*s)),h=Math.max(40,Math.round(canvas.height*s));
+  const c=document.createElement('canvas');
+  c.width=w;c.height=h;
+  const ctx=c.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(canvas,0,0,w,h);
+  const d=ctx.getImageData(0,0,w,h).data;
+
+  // 명암 평균을 기준으로 잉크 픽셀 판정
+  const gray=new Float32Array(w*h);
+  let mean=0;
+  for(let i=0,p=0;i<d.length;i+=4,p++){
+    const g=(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114);
+    gray[p]=g; mean+=g;
+  }
+  mean/=(w*h);
+  const thr=mean*0.82;
+
+  const rows=new Float32Array(h),cols=new Float32Array(w);
+  for(let y=0;y<h;y++){
+    const off=y*w;
+    for(let x=0;x<w;x++){
+      if(gray[off+x]<thr){rows[y]++;cols[x]++}
+    }
+  }
+  c.width=0;c.height=0;
+
+  // 인접 차이의 총합 = 물결이 얼마나 뚜렷한가
+  function ripple(arr){
+    const n=arr.length;
+    let m=0; for(let i=0;i<n;i++)m+=arr[i];
+    m/=n;
+    if(m<0.5)return 0;
+    let v=0; for(let i=1;i<n;i++)v+=Math.abs(arr[i]-arr[i-1]);
+    return (v/(n-1))/m;
+  }
+  return {h:ripple(rows),v:ripple(cols)};
+}
+
+// 3) 종합 판별 — EXIF 우선, 없으면 글자줄 분석
+function detectRotation(img,exifDeg){
+  if(exifDeg)return exifDeg;
+  const c=document.createElement('canvas');
+  c.width=img.width;c.height=img.height;
+  c.getContext('2d').drawImage(img,0,0);
+  const s=textAxisScore(c);
+  c.width=0;c.height=0;
+  // 세로 방향 물결이 뚜렷하면 글자가 옆으로 누운 상태
+  if(s.v>s.h*1.25)return 90;
+  return 0;
+}
+
+function rotateCanvas(src,deg){
+  if(!deg)return src;
+  const c=document.createElement('canvas');
+  const swap=(deg===90||deg===270);
+  c.width=swap?src.height:src.width;
+  c.height=swap?src.width:src.height;
+  const x=c.getContext('2d');
+  x.translate(c.width/2,c.height/2);
+  x.rotate(deg*Math.PI/180);
+  x.drawImage(src,-src.width/2,-src.height/2);
+  return c;
+}
+
 function processImage(file){
   return new Promise(resolve=>{
     const reader=new FileReader();
     reader.onload=e=>{
+      // EXIF 방향 확인
+      let exifDeg=0;
+      try{
+        const bin=atob(e.target.result.split(',')[1]);
+        const buf=new ArrayBuffer(Math.min(bin.length,131072));
+        const u8=new Uint8Array(buf);
+        for(let i=0;i<u8.length;i++)u8[i]=bin.charCodeAt(i);
+        exifDeg=exifToDeg(readExifOrientation(buf));
+      }catch(_){}
+
       const img=new Image();
       img.onload=()=>{
-        // 원본 방향 그대로 유지 (사용자가 회전 필요하면 크롭 에디터에서 수동으로)
-        const srcW=img.width,srcH=img.height;
-        const MAX=2400;let w=srcW,h=srcH;
+        // 0단계: 글자가 바로 서도록 회전 (가로 문서는 가로 유지)
+        const deg=detectRotation(img,exifDeg);
+        let base=document.createElement('canvas');
+        base.width=img.width;base.height=img.height;
+        base.getContext('2d').drawImage(img,0,0);
+        if(deg)base=rotateCanvas(base,deg);
+
+        const MAX=2400;let w=base.width,h=base.height;
         if(w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
         // 1단계: 리사이즈
         const resizeCanvas=document.createElement('canvas');
         resizeCanvas.width=w;resizeCanvas.height=h;
-        resizeCanvas.getContext('2d').drawImage(img,0,0,w,h);
+        resizeCanvas.getContext('2d').drawImage(base,0,0,w,h);
+        base.width=0;base.height=0;
         const resizedImg=new Image();
         resizedImg.onload=()=>{
           // 2단계: 문서 자동 감지 + 원근 보정 시도
@@ -407,7 +531,7 @@ function processImage(file){
           const fw=finalCanvas.width,fh=finalCanvas.height;
           resizeCanvas.width=0;resizeCanvas.height=0;
           if(finalCanvas!==resizeCanvas){finalCanvas.width=0;finalCanvas.height=0}
-          resolve({id:Date.now()+Math.random(),original:e.target.result,processed,width:fw,height:fh,scanned:wasScanned});
+          resolve({id:Date.now()+Math.random(),original:processed,processed,width:fw,height:fh,scanned:wasScanned,autoRot:deg});
         };
         resizedImg.src=resizeCanvas.toDataURL('image/jpeg',0.95);
       };
