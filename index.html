@@ -161,7 +161,7 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
 <div id="crop-popup" class="overlay hidden" style="padding:0;align-items:stretch;flex-direction:column;background:rgba(0,0,0,.92);">
   <div style="background:#0C1929;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;color:#fff;">
     <button onclick="closeCropEditor()" style="background:none;border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;padding:4px 8px;">✕ 취소</button>
-    <div style="text-align:center"><div style="font-size:14px;font-weight:700;">방향·영역 확인</div><div id="rot-hint" style="font-size:10.5px;color:#FCD34D;margin-top:2px">글자가 바로 서 있는지 확인하세요</div></div>
+    <div style="text-align:center"><div style="font-size:14px;font-weight:700;">방향·영역 확인</div><div id="rot-hint" style="font-size:10.5px;color:#FCD34D;margin-top:2px">옆으로 누웠으면 90° 회전을 눌러주세요</div></div>
     <button onclick="applyCrop()" style="background:#10B981;border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:8px;font-family:inherit;">적용 ✓</button>
   </div>
   <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
@@ -180,6 +180,7 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
   <div style="background:#fff;border-radius:20px;width:90%;max-width:320px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:fadeUp .3s ease;" onclick="event.stopPropagation()">
     <div style="padding:18px 20px;border-bottom:1px solid #F1F5F9;text-align:center;">
       <div style="font-size:15px;font-weight:800;color:#0F2940;">첨부 방법 선택</div>
+      <div id="shoot-tip" class="hidden" style="margin-top:8px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:9px;padding:8px 12px;font-size:11.5px;color:#1E40AF;line-height:1.5;text-align:left;">📱 <b>세부내역서는 가로 문서입니다.</b><br>폰을 옆으로 눕혀서 화면 가득 찍어주세요.</div>
     </div>
     <div style="padding:14px 20px;display:flex;flex-direction:column;gap:8px;">
       <button onclick="pickSource('camera')" style="display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;font-size:14px;font-weight:700;color:#1D4ED8;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:12px;font-family:inherit;text-align:left;">
@@ -379,59 +380,7 @@ function autoScan(img){
 /* ═══ 방향 판별 ═══ */
 
 
-// 2) 글자줄 방향 분석 — 글자줄과 빈 줄이 규칙적으로 번갈아 나오는 축을 찾음
-function textAxisScore(canvas){
-  const MAXD=700;
-  const s=Math.min(1,MAXD/Math.max(canvas.width,canvas.height));
-  const w=Math.max(40,Math.round(canvas.width*s)),h=Math.max(40,Math.round(canvas.height*s));
-  const c=document.createElement('canvas');
-  c.width=w;c.height=h;
-  const ctx=c.getContext('2d',{willReadFrequently:true});
-  ctx.drawImage(canvas,0,0,w,h);
-  const d=ctx.getImageData(0,0,w,h).data;
 
-  // 명암 평균을 기준으로 잉크 픽셀 판정
-  const gray=new Float32Array(w*h);
-  let mean=0;
-  for(let i=0,p=0;i<d.length;i+=4,p++){
-    const g=(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114);
-    gray[p]=g; mean+=g;
-  }
-  mean/=(w*h);
-  const thr=mean*0.82;
-
-  const rows=new Float32Array(h),cols=new Float32Array(w);
-  for(let y=0;y<h;y++){
-    const off=y*w;
-    for(let x=0;x<w;x++){
-      if(gray[off+x]<thr){rows[y]++;cols[x]++}
-    }
-  }
-  c.width=0;c.height=0;
-
-  // 인접 차이의 총합 = 물결이 얼마나 뚜렷한가
-  function ripple(arr){
-    const n=arr.length;
-    let m=0; for(let i=0;i<n;i++)m+=arr[i];
-    m/=n;
-    if(m<0.5)return 0;
-    let v=0; for(let i=1;i<n;i++)v+=Math.abs(arr[i]-arr[i-1]);
-    return (v/(n-1))/m;
-  }
-  return {h:ripple(rows),v:ripple(cols)};
-}
-
-// 3) 종합 판별 — EXIF 우선, 없으면 글자줄 분석
-function detectRotation(img){
-  const c=document.createElement('canvas');
-  c.width=img.width;c.height=img.height;
-  c.getContext('2d').drawImage(img,0,0);
-  const s=textAxisScore(c);
-  c.width=0;c.height=0;
-  // 세로 방향 물결이 뚜렷하면 글자가 옆으로 누운 상태
-  if(s.v>s.h*1.25)return 90;
-  return 0;
-}
 
 function rotateCanvas(src,deg){
   if(!deg)return src;
@@ -454,12 +403,11 @@ function processImage(file){
       // 종이 자체가 돌아간 경우만 글자줄 방향으로 판별한다.
       const img=new Image();
       img.onload=()=>{
-        // 0단계: 글자가 바로 서도록 회전 (가로 문서는 가로 유지)
-        const deg=detectRotation(img);
-        let base=document.createElement('canvas');
+        // 방향은 건드리지 않는다. 필요하면 편집 화면에서 직접 회전.
+        const deg=0;
+        const base=document.createElement('canvas');
         base.width=img.width;base.height=img.height;
         base.getContext('2d').drawImage(img,0,0);
-        if(deg)base=rotateCanvas(base,deg);
 
         const MAX=2400;let w=base.width,h=base.height;
         if(w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
@@ -802,7 +750,12 @@ setTimeout(()=>{
   }
 },500);
 
-function openSourcePicker(mid,hid,type){pendingUpload={mid,hid,type};document.getElementById('source-popup').classList.remove('hidden')}
+function openSourcePicker(mid,hid,type){
+  pendingUpload={mid,hid,type};
+  const tip=document.getElementById('shoot-tip');
+  if(tip)tip.classList.toggle('hidden',type!=='detail');
+  document.getElementById('source-popup').classList.remove('hidden');
+}
 function closeSourcePicker(){document.getElementById('source-popup').classList.add('hidden')}
 function pickSource(src){closeSourcePicker();if(src==='camera')document.getElementById('cameraInput').click();else document.getElementById('fileInput').click()}
 function openInfoPopup(){document.getElementById('info-popup').classList.remove('hidden')}
