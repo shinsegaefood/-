@@ -364,17 +364,67 @@ function onOpenCvReady(){
 function applyScanEffect(canvas){const ctx=canvas.getContext('2d'),id=ctx.getImageData(0,0,canvas.width,canvas.height),d=id.data;for(let i=0;i<d.length;i+=4)for(let c=0;c<3;c++){let v=d[i+c];v=((v/255-0.5)*1.15+0.5)*255+0;d[i+c]=Math.max(0,Math.min(255,v))}ctx.putImageData(id,0,0)}
 
 // jscanify를 사용한 자동 문서 보정 (실패 시 일반 보정 적용)
+/* 감지된 네 모서리가 실제 종이 모양으로 타당한지 검사 */
+function cornersPlausible(c,W,H){
+  if(!c)return false;
+  const p=[c.topLeftCorner,c.topRightCorner,c.bottomRightCorner,c.bottomLeftCorner];
+  if(p.some(v=>!v||typeof v.x!=='number'||typeof v.y!=='number'))return false;
+
+  // 변의 길이가 지나치게 짧거나, 서로 심하게 불균형하면 실패로 본다
+  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  const top=d(p[0],p[1]), right=d(p[1],p[2]), bot=d(p[2],p[3]), left=d(p[3],p[0]);
+  if(Math.min(top,right,bot,left) < Math.min(W,H)*0.25) return false;
+  if(Math.max(top,bot)/Math.max(1,Math.min(top,bot)) > 1.45) return false;
+  if(Math.max(left,right)/Math.max(1,Math.min(left,right)) > 1.45) return false;
+
+  // 면적이 화면의 30% 미만이면 종이를 제대로 못 잡은 것
+  let area=0;
+  for(let i=0;i<4;i++){const a=p[i],b=p[(i+1)%4];area+=a.x*b.y-b.x*a.y}
+  area=Math.abs(area)/2;
+  if(area < W*H*0.30) return false;
+
+  // 네 점이 모두 화면 테두리에 붙어 있으면 종이를 못 찾고 전체를 잡은 것
+  const m=Math.min(W,H)*0.02;
+  const onEdge=v=>(v.x<m||v.x>W-m||v.y<m||v.y>H-m);
+  if(p.filter(onEdge).length>=3) return false;
+
+  // 각 모서리 각도가 직각에서 크게 벗어나면 실패
+  for(let i=0;i<4;i++){
+    const a=p[(i+3)%4], b=p[i], c2=p[(i+1)%4];
+    const v1={x:a.x-b.x,y:a.y-b.y}, v2={x:c2.x-b.x,y:c2.y-b.y};
+    const cos=(v1.x*v2.x+v1.y*v2.y)/(Math.hypot(v1.x,v1.y)*Math.hypot(v2.x,v2.y)||1);
+    const ang=Math.acos(Math.max(-1,Math.min(1,cos)))*180/Math.PI;
+    if(ang<55||ang>125) return false;
+  }
+  return true;
+}
+
 function autoScan(img){
-  if(!opencvReady||typeof jscanify==='undefined')return null;
+  if(!opencvReady||typeof jscanify==='undefined'||typeof cv==='undefined')return null;
+  let src=null;
   try{
     const scanner=new jscanify();
     const sourceCanvas=document.createElement('canvas');
     sourceCanvas.width=img.width;
     sourceCanvas.height=img.height;
     sourceCanvas.getContext('2d').drawImage(img,0,0);
-    const result=scanner.extractPaper(sourceCanvas,img.width,img.height);
-    return result;
-  }catch(e){console.log('scan fallback:',e);return null}
+
+    // 먼저 모서리를 구해 타당성을 검사한다
+    src=cv.imread(sourceCanvas);
+    const contour=scanner.findPaperContour(src);
+    if(!contour){src.delete();return null}
+    const corners=scanner.getCornerPoints(contour,sourceCanvas);
+    src.delete(); src=null;
+    if(!cornersPlausible(corners,img.width,img.height)){
+      console.log('모서리 감지 결과가 부적절하여 원본 사용');
+      return null;
+    }
+    return scanner.extractPaper(sourceCanvas,img.width,img.height);
+  }catch(e){
+    console.log('scan fallback:',e);
+    try{src&&src.delete()}catch(_){}
+    return null;
+  }
 }
 
 /* ═══ 방향 판별 ═══ */
@@ -502,30 +552,34 @@ function closeCropEditor(){
 function tryAutoDetect(){
   if(!cropCtx.img)return false;
   if(!opencvReady||typeof jscanify==='undefined'){
-    console.log('자동 감지 사용 불가: OpenCV 또는 jscanify 미로딩');
+    console.log('자동 감지 사용 불가');
     return false;
   }
+  let src=null;
   try{
     const tmpCanvas=document.createElement('canvas');
     tmpCanvas.width=cropCtx.img.width;tmpCanvas.height=cropCtx.img.height;
     tmpCanvas.getContext('2d').drawImage(cropCtx.img,0,0);
     const scanner=new jscanify();
-    const src=cv.imread(tmpCanvas);
+    src=cv.imread(tmpCanvas);
     const contour=scanner.findPaperContour(src);
-    if(contour){
-      const pts=scanner.getCornerPoints(contour,tmpCanvas);
-      cropCtx.corners=[
-        {x:pts.topLeftCorner.x,y:pts.topLeftCorner.y},
-        {x:pts.topRightCorner.x,y:pts.topRightCorner.y},
-        {x:pts.bottomRightCorner.x,y:pts.bottomRightCorner.y},
-        {x:pts.bottomLeftCorner.x,y:pts.bottomLeftCorner.y}
-      ];
-      src.delete();
-      return true;
-    }
-    src.delete();
+    if(!contour){src.delete();return false}
+    const pts=scanner.getCornerPoints(contour,tmpCanvas);
+    src.delete(); src=null;
+    // 타당하지 않은 결과는 쓰지 않는다 (반쪽짜리 감지가 오히려 이미지를 망침)
+    if(!cornersPlausible(pts,cropCtx.img.width,cropCtx.img.height))return false;
+    cropCtx.corners=[
+      {x:pts.topLeftCorner.x,y:pts.topLeftCorner.y},
+      {x:pts.topRightCorner.x,y:pts.topRightCorner.y},
+      {x:pts.bottomRightCorner.x,y:pts.bottomRightCorner.y},
+      {x:pts.bottomLeftCorner.x,y:pts.bottomLeftCorner.y}
+    ];
+    return true;
+  }catch(e){
+    console.log('auto detect fail:',e);
+    try{src&&src.delete()}catch(_){}
     return false;
-  }catch(e){console.log('auto detect fail:',e);return false}
+  }
 }
 
 function resetToAuto(){
