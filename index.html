@@ -78,6 +78,8 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
 .doc-thumb img{width:100%;height:100%;object-fit:cover}
 .doc-thumb-del{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#EF4444;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;cursor:pointer;font-weight:700;z-index:2;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 .doc-thumb-scanned{position:absolute;bottom:-3px;left:-3px;background:#10B981;color:#fff;font-size:9px;font-weight:800;padding:1px 4px;border-radius:6px;border:1.5px solid #fff;line-height:1.2;pointer-events:none}
+.nb{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;border-radius:7px;cursor:pointer;font-family:inherit;padding:0}
+.nb:active{background:#2563EB}
 .doc-thumb-edit{position:absolute;bottom:-3px;right:-3px;background:#3B82F6;color:#fff;font-size:9px;font-weight:800;padding:2px 5px;border-radius:6px;border:1.5px solid #fff;line-height:1.2;pointer-events:none}
 .add-btn{width:100%;padding:10px;border:2px dashed #CBD5E1;border-radius:12px;background:#FAFBFD;font-size:12.5px;font-weight:700;color:#64748B;display:flex;align-items:center;justify-content:center;gap:6px}
 .add-member-btn{border-color:#DDD6FE;color:#7C3AED;background:#FAFAFF}
@@ -164,8 +166,19 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
     <div style="text-align:center"><div style="font-size:14px;font-weight:700;">방향·영역 확인</div><div id="rot-hint" style="font-size:10.5px;color:#FCD34D;margin-top:2px">옆으로 누웠으면 90° 회전을 눌러주세요</div></div>
     <button onclick="applyCrop()" style="background:#10B981;border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:8px;font-family:inherit;">적용 ✓</button>
   </div>
-  <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;padding:10px 46px;">
     <canvas id="crop-canvas" style="max-width:100%;max-height:100%;touch-action:none;"></canvas>
+  </div>
+  <div id="nudge-bar" style="background:#0F2036;padding:8px 16px;display:flex;align-items:center;justify-content:center;gap:10px;">
+    <span id="nudge-label" style="font-size:11.5px;color:rgba(255,255,255,.55);min-width:110px;">모서리를 눌러 선택하세요</span>
+    <div style="display:grid;grid-template-columns:repeat(3,36px);grid-template-rows:repeat(2,30px);gap:3px;">
+      <div></div>
+      <button onclick="nudge(0,-1)" class="nb">▲</button>
+      <div></div>
+      <button onclick="nudge(-1,0)" class="nb">◀</button>
+      <button onclick="nudge(0,1)" class="nb">▼</button>
+      <button onclick="nudge(1,0)" class="nb">▶</button>
+    </div>
   </div>
   <div style="background:#162D50;padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
     <button onclick="rotateCropImage()" style="background:#2563EB;border:none;color:#fff;font-size:13px;font-weight:800;cursor:pointer;padding:10px 18px;border-radius:8px;font-family:inherit;box-shadow:0 2px 8px rgba(37,99,235,.4)">↻ 90° 회전</button>
@@ -173,7 +186,7 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
     <button onclick="resetToFull()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">⛶ 전체 영역</button>
     <button onclick="useOriginal()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">↺ 처음으로</button>
   </div>
-  <div style="background:#0C1929;padding:8px 16px;color:rgba(255,255,255,.5);font-size:11px;text-align:center;">네 모서리(파란 점)를 드래그하여 영역 조정</div>
+  <div style="background:#0C1929;padding:8px 16px;color:rgba(255,255,255,.5);font-size:11px;text-align:center;">모서리를 눌러 선택한 뒤 드래그하거나 화살표로 조정</div>
 </div>
 
 <div id="source-popup" class="overlay hidden" onclick="closeSourcePicker()">
@@ -606,7 +619,24 @@ function recompressForSend(imgDataUrl, totalCount){
 }
 
 // ═══ 수동 크롭 에디터 ═══
-let cropCtx={mid:null,hid:null,type:null,idx:null,img:null,corners:[],scale:1,offsetX:0,offsetY:0,dragIdx:-1};
+let cropCtx={mid:null,hid:null,type:null,idx:null,img:null,corners:[],scale:1,offsetX:0,offsetY:0,dragIdx:-1,selIdx:-1};
+const CORNER_NAMES=['좌상','우상','우하','좌하'];
+function setSel(i){
+  cropCtx.selIdx=i;
+  const el=document.getElementById('nudge-label');
+  if(el)el.textContent = i<0 ? '모서리를 눌러 선택하세요' : CORNER_NAMES[i]+' 모서리 선택됨';
+  drawCrop();
+}
+function nudge(dx,dy){
+  if(!cropCtx.img)return;
+  let i=cropCtx.selIdx;
+  if(i<0){setSel(0);i=0}
+  const step=Math.max(4,Math.round(Math.max(cropCtx.img.width,cropCtx.img.height)*0.006));
+  const c=cropCtx.corners[i];
+  c.x=Math.max(0,Math.min(cropCtx.img.width, c.x+dx*step));
+  c.y=Math.max(0,Math.min(cropCtx.img.height, c.y+dy*step));
+  drawCrop();
+}
 
 function openCropEditor(mid,hid,type,idx){
   const m=members.find(x=>x.id===mid);if(!m)return;
@@ -622,6 +652,8 @@ function openCropEditor(mid,hid,type,idx){
     document.getElementById('crop-popup').classList.remove('hidden');
     requestAnimationFrame(()=>{
       requestAnimationFrame(()=>{
+        cropCtx.selIdx=-1;
+        const nl=document.getElementById('nudge-label');if(nl)nl.textContent='모서리를 눌러 선택하세요';
         resetToFull(); // 이미 편집된 경우 이미지가 곧 편집 결과라 전체영역이 맞음
         // 처음 편집이고 OpenCV 준비되어 있으면 자동 감지 시도
         if(!d.manuallyEdited && opencvReady) tryAutoDetect();
@@ -689,7 +721,9 @@ function resetToAuto(){
 function resetToFull(){
   if(!cropCtx.img)return;
   const w=cropCtx.img.width,h=cropCtx.img.height;
-  cropCtx.corners=[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];
+  // 모서리를 이미지 끝에서 살짝 안쪽에 두어 손으로 잡기 쉽게 한다
+  const m=Math.round(Math.min(w,h)*0.012);
+  cropCtx.corners=[{x:m,y:m},{x:w-m,y:m},{x:w-m,y:h-m},{x:m,y:h-m}];
   drawCrop();
 }
 function rotateCropImage(){
@@ -759,8 +793,10 @@ function drawCrop(){
   // Draw corner handles
   cropCtx.corners.forEach((c,i)=>{
     const x=c.x*scale,y=c.y*scale;
-    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,14,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#3B82F6';ctx.beginPath();ctx.arc(x,y,10,0,Math.PI*2);ctx.fill();
+    const on=(i===cropCtx.selIdx);
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,on?19:15,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=on?'#10B981':'#3B82F6';ctx.beginPath();ctx.arc(x,y,on?14:11,0,Math.PI*2);ctx.fill();
+    if(on){ctx.strokeStyle='#10B981';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,24,0,Math.PI*2);ctx.stroke()}
   });
 }
 
@@ -780,7 +816,7 @@ function cropStart(e){
     const d=Math.hypot(c.x-p.x,c.y-p.y);
     if(d<bestDist){bestDist=d;best=i}
   });
-  if(bestDist*cropCtx.scale<30)cropCtx.dragIdx=best;
+  if(bestDist*cropCtx.scale<44){cropCtx.dragIdx=best;setSel(best)}
 }
 
 function cropMove(e){
