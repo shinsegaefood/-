@@ -183,7 +183,7 @@ button:active{transform:scale(.97)}button{font-family:inherit;cursor:pointer}
   </div>
   <div style="background:#162D50;padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
     <button onclick="rotateCropImage()" style="background:#2563EB;border:none;color:#fff;font-size:13px;font-weight:800;cursor:pointer;padding:10px 18px;border-radius:8px;font-family:inherit;box-shadow:0 2px 8px rgba(37,99,235,.4)">↻ 90° 회전</button>
-    <button onclick="resetToAuto()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">📄 종이 찾기</button>
+    <button onclick="resetToAuto()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">📐 영역 자동잡기</button>
     <button onclick="resetToFull()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">⛶ 전체 영역</button>
     <button onclick="useOriginal()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;font-family:inherit;">↺ 처음으로</button>
   </div>
@@ -460,6 +460,60 @@ function houghQuad(canvas,W,H,st){
   finally{[src,gray,blur,edges,lines].forEach(m=>{try{m&&m.delete()}catch(_){}})}
 }
 
+/* 표 선으로 왜곡을 계산해 이미지 전체를 펴준다 (자르지 않음)
+   표가 반듯해지면 문서 전체도 함께 반듯해진다. */
+function deskewWholeImage(canvas,q){
+  const W=canvas.width,H=canvas.height;
+  const p=[q.topLeftCorner,q.topRightCorner,q.bottomRightCorner,q.bottomLeftCorner];
+  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+
+  // 표가 펴졌을 때의 목표 크기
+  const tw=Math.max(d(p[0],p[1]),d(p[3],p[2]));
+  const th=Math.max(d(p[0],p[3]),d(p[1],p[2]));
+  if(tw<40||th<40)return null;
+
+  // 표를 (0,0)-(tw,th) 로 보내는 변환을 구한 뒤,
+  // 그 변환을 이미지 네 귀퉁이에도 적용해 전체가 들어갈 캔버스를 잡는다
+  let src=null,M=null,dst=null,sp=null,dp=null,Mfull=null,sp2=null,dp2=null;
+  try{
+    sp=cv.matFromArray(4,1,cv.CV_32FC2,[p[0].x,p[0].y,p[1].x,p[1].y,p[2].x,p[2].y,p[3].x,p[3].y]);
+    dp=cv.matFromArray(4,1,cv.CV_32FC2,[0,0,tw,0,tw,th,0,th]);
+    M=cv.getPerspectiveTransform(sp,dp);
+
+    // M을 자바스크립트 배열로 꺼내 이미지 모서리를 투영
+    const m=[];
+    for(let i=0;i<9;i++)m.push(M.doubleAt(Math.floor(i/3),i%3));
+    const proj=(x,y)=>{
+      const w=m[6]*x+m[7]*y+m[8];
+      return {x:(m[0]*x+m[1]*y+m[2])/w, y:(m[3]*x+m[4]*y+m[5])/w};
+    };
+    const cor=[proj(0,0),proj(W,0),proj(W,H),proj(0,H)];
+    const xs=cor.map(c=>c.x), ys=cor.map(c=>c.y);
+    const minX=Math.min(...xs), maxX=Math.max(...xs);
+    const minY=Math.min(...ys), maxY=Math.max(...ys);
+    let outW=Math.round(maxX-minX), outH=Math.round(maxY-minY);
+    if(!isFinite(outW)||!isFinite(outH)||outW<50||outH<50)return null;
+
+    // 결과가 지나치게 커지면 보정이 잘못된 것으로 보고 포기
+    if(outW>W*2.2||outH>H*2.2)return null;
+
+    // 원점이 음수로 밀린 만큼 되돌려 전체가 화면에 담기게 한다
+    src=cv.imread(canvas);
+    sp2=cv.matFromArray(4,1,cv.CV_32FC2,[p[0].x,p[0].y,p[1].x,p[1].y,p[2].x,p[2].y,p[3].x,p[3].y]);
+    dp2=cv.matFromArray(4,1,cv.CV_32FC2,[
+      0-minX,0-minY, tw-minX,0-minY, tw-minX,th-minY, 0-minX,th-minY
+    ]);
+    Mfull=cv.getPerspectiveTransform(sp2,dp2);
+    dst=new cv.Mat();
+    cv.warpPerspective(src,dst,Mfull,new cv.Size(outW,outH),
+      cv.INTER_LINEAR,cv.BORDER_CONSTANT,new cv.Scalar(255,255,255,255));
+    const out=document.createElement('canvas');
+    cv.imshow(out,dst);
+    return out;
+  }catch(e){console.log('deskew fail:',e);return null}
+  finally{[src,M,dst,sp,dp,Mfull,sp2,dp2].forEach(x=>{try{x&&x.delete()}catch(_){}})}
+}
+
 /* 원근 보정 실행 */
 function warpToQuad(canvas,c){
   const p=[c.topLeftCorner,c.topRightCorner,c.bottomRightCorner,c.bottomLeftCorner];
@@ -523,10 +577,10 @@ function autoScan(img){
   sourceCanvas.width=img.width; sourceCanvas.height=img.height;
   sourceCanvas.getContext('2d').drawImage(img,0,0);
 
-  // 1순위: 인쇄된 표 테두리로 찾기 (배경 색과 무관하게 안정적)
+  // 1순위: 표 선으로 왜곡만 계산해 전체를 편다 (내용이 잘리지 않음)
   const q=detectTableQuad(sourceCanvas);
   if(q&&cornersPlausible(q,img.width,img.height)){
-    const out=warpToQuad(sourceCanvas,q);
+    const out=deskewWholeImage(sourceCanvas,q);
     if(out)return out;
   }
   // 2순위: 종이 테두리 (배경이 어두울 때 잘 됨)
@@ -674,17 +728,15 @@ function openCropEditor(mid,hid,type,idx){
       requestAnimationFrame(()=>{
         cropCtx.selIdx=-1;
         const nl=document.getElementById('nudge-label');if(nl)nl.textContent='모서리를 눌러 선택하세요';
-        resetToFull();
-        let found=false;
-        if(!d.manuallyEdited && opencvReady) found=tryAutoDetect();
+        resetToFull();   // 전체 영역 유지 — 필요하면 직원이 직접 좁힌다
         const hint=document.getElementById('rot-hint');
         if(hint){
-          if(d.scanned||found){
-            hint.textContent='✓ 자동으로 맞췄습니다 · 확인 후 적용';
+          if(d.scanned){
+            hint.textContent='✓ 자동으로 반듯하게 폈습니다 · 그대로 적용하셔도 됩니다';
             hint.style.color='#6EE7B7';
           }else{
-            hint.textContent='⚠ 자동 인식 실패 · 네 모서리를 서류에 맞춰주세요';
-            hint.style.color='#FCA5A5';
+            hint.textContent='자동 보정이 되지 않았습니다 · 필요하면 모서리를 맞춰주세요';
+            hint.style.color='#FCD34D';
           }
         }
         drawCrop();
